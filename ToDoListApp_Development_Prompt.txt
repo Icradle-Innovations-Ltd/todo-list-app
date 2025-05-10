@@ -1,0 +1,178 @@
+**Prompt: Develop a To-Do List Web Application**
+
+**Objective**: Build a full-stack to-do list web application using React for the frontend, Express.js for the backend, and SQLite for data storage. The app must implement the following features: task creation, due dates & reminders, prioritization, categories/labels, recurring tasks, checklists, progress tracking, calendar integration, notes & attachments, search & filters, and customization. Follow the provided project structure and use Tailwind CSS for styling.
+
+**Project Structure**:
+```
+todo-list-app/
+├── client/                           # React frontend
+│   ├── public/                       # Static assets
+│   │   ├── index.html                # Main HTML file
+│   │   └── favicon.ico               # Favicon
+│   ├── src/                          # React source code
+│   │   ├── components/               # Reusable React components
+│   │   │   ├── TaskForm.jsx          # Form for adding/editing tasks
+│   │   │   ├── TaskList.jsx          # Displays list of tasks
+│   │   │   ├── TaskItem.jsx          # Individual task item
+│   │   │   ├── ProgressTracker.jsx   # Progress tracking component
+│   │   │   └── ThemeToggle.jsx       # Theme toggle button
+│   │   ├── pages/                    # Page-level components
+│   │   │   └── Home.jsx              # Main app page
+│   │   ├── hooks/                    # Custom React hooks
+│   │   │   └── useTasks.js           # Hook for task-related API calls
+│   │   ├── utils/                    # Utility functions
+│   │   │   └── api.js                # API fetch functions
+│   │   ├── styles/                   # CSS/Tailwind styles
+│   │   │   └── tailwind.css          # Custom Tailwind styles
+│   │   ├── App.jsx                   # Main App component
+│   │   ├── index.jsx                 # React entry point
+│   │   └── constants.js              # App-wide constants (e.g., priorities, recurring options)
+│   ├── package.json                  # Frontend dependencies and scripts
+│   ├── tailwind.config.js            # Tailwind CSS configuration
+│   └── .env                          # Environment variables (e.g., API URL)
+├── server/                           # Express.js backend
+│   ├── src/                          # Backend source code
+│   │   ├── routes/                   # API route handlers
+│   │   │   └── tasks.js              # Task-related routes
+│   │   ├── models/                   # Database models
+│   │   │   └── task.js               # Task model for SQLite interactions
+│   │   ├── controllers/              # Business logic for routes
+│   │   │   └── taskController.js     # Task-related controller logic
+│   │   ├── middleware/               # Custom middleware
+│   │   │   └── errorHandler.js       # Error handling middleware
+│   │   ├── utils/                    # Utility functions
+│   │   │   └── db.js                 # SQLite database connection
+│   │   └── constants.js              # Backend constants (e.g., status options)
+│   ├── data/                         # Database storage
+│   │   └── tasks.db                  # SQLite database file
+│   ├── server.js                     # Main Express server entry point
+│   ├── package.json                  # Backend dependencies and scripts
+│   └── .env                          # Environment variables (e.g., PORT, DB_PATH)
+├── README.md                         # Project documentation
+├── .gitignore                        # Git ignore file
+└── docker-compose.yml                # Optional: Docker setup for development
+```
+
+**Technologies**:
+- **Frontend**: React (via CDN or npm), Tailwind CSS (via CDN or npm), Axios for API calls.
+- **Backend**: Express.js, SQLite (persistent storage in `server/data/tasks.db`).
+- **Environment**: Node.js, npm for dependency management.
+- **Optional**: Vite for frontend dev server, nodemon for backend dev.
+
+**Features to Implement**:
+1. **Task Creation**: Allow users to create tasks with title, description, due date, priority, category, recurring option, checklist, notes, and status.
+2. **Due Dates & Reminders**: Support due date input and client-side reminders via browser notifications.
+3. **Prioritization**: Provide options for High, Medium, Low priority.
+4. **Categories/Labels**: Allow users to assign a category to tasks for organization.
+5. **Recurring Tasks**: Support None, Daily, Weekly, Monthly recurring options.
+6. **Checklists**: Enable adding sub-tasks (checklist items) to a task, stored as JSON.
+7. **Progress Tracking**: Display the number of completed tasks vs. total tasks.
+8. **Calendar Integration**: Store due dates for potential export to external calendars (e.g., Google Calendar via iCal format).
+9. **Notes & Attachments**: Support text notes; attachments optional (if implemented, store files in `server/uploads/`).
+10. **Search & Filters**: Filter tasks by title or category via a search input.
+11. **Customization**: Provide light/dark theme toggle.
+
+**Requirements**:
+
+**General**:
+- Follow the project structure exactly as provided.
+- Use modern JavaScript (ES6+) and JSX for React components.
+- Ensure the app is responsive and styled with Tailwind CSS.
+- Implement error handling for API calls and database operations.
+- Use environment variables (`.env`) for configuration (e.g., API URL, port, database path).
+- Include input validation (frontend and backend) to prevent invalid data.
+- Write clean, modular, and well-documented code.
+
+**Frontend (client/)**:
+- **index.html**: Create a single-page HTML file with CDN links for React, ReactDOM, Babel, and Tailwind CSS. Include a `<div id="root">` for React mounting.
+- **App.jsx**: Root component managing theme state (light/dark) and rendering the `Home` page.
+- **Home.jsx**: Main page combining `TaskForm`, `TaskList`, `ProgressTracker`, and `ThemeToggle`.
+- **TaskForm.jsx**: Form for adding/editing tasks with inputs for:
+  - Title (text, required).
+  - Description (textarea).
+  - Due date (date input).
+  - Priority (dropdown: High, Medium, Low).
+  - Category (text).
+  - Recurring (dropdown: None, Daily, Weekly, Monthly).
+  - Checklist (dynamic input for adding sub-tasks, stored as array).
+  - Notes (textarea).
+  - Submit button to send data to `POST /api/tasks`.
+- **TaskList.jsx**: Display tasks in a grid or list, with a search input to filter by title or category.
+- **TaskItem.jsx**: Show task details (title, due date, priority, category, recurring, checklist, notes, status) and a button to toggle status (Pending ↔ Completed) via `PUT /api/tasks/:id`.
+- **ProgressTracker.jsx**: Calculate and display “Completed: X/Y tasks” based on task status.
+- **ThemeToggle.jsx**: Button to toggle light/dark theme, updating Tailwind classes.
+- **useTasks.js**: Custom hook for:
+  - Fetching tasks (`GET /api/tasks`).
+  - Adding tasks (`POST /api/tasks`).
+  - Updating task status (`PUT /api/tasks/:id`).
+  - Managing loading and error states.
+- **api.js**: Utility functions for API requests using Axios or fetch, with base URL from `.env`.
+- **constants.js**: Define constants (e.g., `PRIORITIES = ['High', 'Medium', 'Low']`, `RECURRING_OPTIONS = ['None', 'Daily', 'Weekly', 'Monthly']`).
+- **tailwind.css**: Custom Tailwind styles (e.g., app-specific colors).
+- **tailwind.config.js**: Configure Tailwind with content paths (`./src/**/*.{jsx,js}`) and custom theme settings.
+- **package.json**: Include dependencies (`react`, `react-dom`, `axios`, `tailwindcss`, `vite`) and scripts (`start`, `build`, `preview`).
+- **.env**: Define `REACT_APP_API_URL=http://localhost:3000`.
+
+**Backend (server/)**:
+- **server.js**: Main Express server:
+  - Set up middleware (CORS, JSON parsing, error handling).
+  - Mount routes (`/api/tasks`).
+  - Listen on port from `.env` (default: 3000).
+- **tasks.js**: Define routes:
+  - `GET /api/tasks`: Return all tasks.
+  - `POST /api/tasks`: Create a new task.
+  - `PUT /api/tasks/:id`: Update task status.
+- **task.js**: Database model with functions for:
+  - Creating the `tasks` table (`id`, `title`, `description`, `dueDate`, `priority`, `category`, `recurring`, `checklist` (JSON), `notes`, `status`).
+  - Querying tasks (get all, create, update).
+- **taskController.js**: Handle route logic:
+  - Validate input (e.g., title required).
+  - Call model functions and return responses.
+- **errorHandler.js**: Middleware for consistent error responses (e.g., 500 for server errors).
+- **db.js**: Initialize SQLite database (`server/data/tasks.db`) and create `tasks` table.
+- **constants.js**: Define constants (e.g., `STATUSES = ['Pending', 'Completed']`).
+- **package.json**: Include dependencies (`express`, `sqlite3`, `cors`, `nodemon`) and scripts (`start`, `dev`).
+- **.env**: Define `PORT=3000`, `DB_PATH=./data/tasks.db`.
+
+**Feature Implementation**:
+- **Task Creation**: `TaskForm.jsx` submits task data to `POST /api/tasks`, stored in `tasks.db`.
+- **Due Dates & Reminders**: Store due dates in `tasks.db`; implement reminders in `useTasks.js` using browser `Notification` API.
+- **Prioritization**: Store priority in `tasks.db`; display in `TaskItem.jsx`.
+- **Categories/Labels**: Store category in `tasks.db`; filter in `TaskList.jsx`.
+- **Recurring Tasks**: Store recurring option in `tasks.db`; display in `TaskItem.jsx`.
+- **Checklists**: Store as JSON in `tasks.db`; allow adding items in `TaskForm.jsx`.
+- **Progress Tracking**: Calculate in `ProgressTracker.jsx` using task status.
+- **Calendar Integration**: Store due dates in `tasks.db`; provide export functionality in `api.js` (e.g., iCal format).
+- **Notes & Attachments**: Store notes in `tasks.db`; for attachments, optionally add file upload in `taskController.js` and store in `server/uploads/`.
+- **Search & Filters**: Implement client-side filtering in `TaskList.jsx`.
+- **Customization**: Implement theme toggle in `ThemeToggle.jsx`, applying Tailwind classes.
+
+**Additional Notes**:
+- Ensure the frontend communicates with the backend at `http://localhost:3000/api`.
+- Use persistent SQLite storage (`server/data/tasks.db`) instead of in-memory.
+- Add input sanitization in `taskController.js` to prevent SQL injection.
+- Implement basic security (e.g., validate API inputs, handle CORS properly).
+- For calendar integration, focus on storing due dates; full integration (e.g., Google Calendar) is optional.
+- For attachments, implement file uploads only if feasible within SQLite constraints.
+- Include a `README.md` with setup instructions, feature list, and tech stack.
+- Add `.gitignore` to exclude `node_modules`, `.env`, and `tasks.db`.
+
+**Deliverables**:
+- Complete source code for all files in the project structure.
+- Instructions for running the app (e.g., `npm install`, `npm start` in `client/` and `server/`).
+- A working app with all specified features, accessible via browser.
+
+**Constraints**:
+- Do not use `<form>` `onSubmit` in React due to sandbox restrictions; use button `onClick` for form submission.
+- Use `className` instead of `class` in JSX.
+- Ensure SQLite database is lightweight and file-based.
+- Avoid external dependencies beyond those specified unless necessary.
+
+**Success Criteria**:
+- The app runs without errors on `http://localhost:3000`.
+- All features are implemented and functional.
+- The UI is responsive, styled with Tailwind CSS, and supports light/dark themes.
+- The backend persists data in `tasks.db` and handles API requests correctly.
+- Code is modular, well-documented, and follows the project structure.
+
+Please provide the complete implementation, including all files listed in the project structure, with code wrapped in appropriate `<xaiArtifact>` tags for each file. Ensure the app is fully functional and meets all requirements.
