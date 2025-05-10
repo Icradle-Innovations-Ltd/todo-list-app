@@ -1,0 +1,25 @@
+{
+  "name": "todo-list-app",
+  "version": "1.0.0",
+  "description": "A comprehensive task management application with React frontend and Express backend",
+  "scripts": {
+    "setup": "npm install && cd server && npm install && cd ../client && npm install",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "cd client && npm run build",
+    "start": "cd server && npm start"
+  },
+  "keywords": [
+    "todo",
+    "task-management",
+    "react",
+    "express",
+    "sqlite"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
