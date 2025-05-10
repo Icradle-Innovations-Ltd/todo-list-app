@@ -3,8 +3,19 @@ const { STATUSES, PRIORITIES, RECURRING_OPTIONS } = require('../constants');
 
 // Task controller with business logic for routes
 const taskController = {
-  // Get all tasks
+  // Get all tasks for the authenticated user
   getAllTasks: async (req, res, next) => {
+    try {
+      const userId = req.userId; // Set by the authenticateToken middleware
+      const tasks = await Task.getAllByUser(userId);
+      res.json(tasks);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // Get all tasks (admin function)
+  getAllTasksAdmin: async (req, res, next) => {
     try {
       const tasks = await Task.getAll();
       res.json(tasks);
@@ -17,9 +28,13 @@ const taskController = {
   getTaskById: async (req, res, next) => {
     try {
       const taskId = req.params.id;
-      const task = await Task.getById(taskId);
+      const userId = req.userId; // Set by the authenticateToken middleware
+      const task = await Task.getById(taskId, userId);
       res.json(task);
     } catch (error) {
+      if (error.message === 'Task not found') {
+        return res.status(404).json({ error: 'Task not found' });
+      }
       next(error);
     }
   },
@@ -27,7 +42,11 @@ const taskController = {
   // Create a new task
   createTask: async (req, res, next) => {
     try {
-      const taskData = req.body;
+      const userId = req.userId; // Set by the authenticateToken middleware
+      const taskData = {
+        ...req.body,
+        user_id: userId // Add the user ID to the task data
+      };
       
       // Validate required fields
       if (!taskData.title || taskData.title.trim() === '') {
@@ -67,6 +86,7 @@ const taskController = {
   updateTask: async (req, res, next) => {
     try {
       const taskId = req.params.id;
+      const userId = req.userId; // Set by the authenticateToken middleware
       const taskData = req.body;
 
       // Validate priority if provided
@@ -90,10 +110,13 @@ const taskController = {
         });
       }
 
-      // Update the task
-      const updatedTask = await Task.update(taskId, taskData);
+      // Update the task (ensuring it belongs to the authenticated user)
+      const updatedTask = await Task.update(taskId, taskData, userId);
       res.json(updatedTask);
     } catch (error) {
+      if (error.message === 'Task not found') {
+        return res.status(404).json({ error: 'Task not found' });
+      }
       next(error);
     }
   },
@@ -102,9 +125,13 @@ const taskController = {
   deleteTask: async (req, res, next) => {
     try {
       const taskId = req.params.id;
-      const result = await Task.delete(taskId);
+      const userId = req.userId; // Set by the authenticateToken middleware
+      const result = await Task.delete(taskId, userId);
       res.json(result);
     } catch (error) {
+      if (error.message === 'No task was deleted') {
+        return res.status(404).json({ error: 'Task not found' });
+      }
       next(error);
     }
   },
@@ -113,17 +140,21 @@ const taskController = {
   toggleTaskStatus: async (req, res, next) => {
     try {
       const taskId = req.params.id;
+      const userId = req.userId; // Set by the authenticateToken middleware
       
-      // Get the current task
-      const task = await Task.getById(taskId);
+      // Get the current task (ensuring it belongs to the authenticated user)
+      const task = await Task.getById(taskId, userId);
       
       // Toggle the status
       const newStatus = task.status === 'Pending' ? 'Completed' : 'Pending';
       
       // Update the task with the new status
-      const updatedTask = await Task.update(taskId, { status: newStatus });
+      const updatedTask = await Task.update(taskId, { status: newStatus }, userId);
       res.json(updatedTask);
     } catch (error) {
+      if (error.message === 'Task not found') {
+        return res.status(404).json({ error: 'Task not found' });
+      }
       next(error);
     }
   }
