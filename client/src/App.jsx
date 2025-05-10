@@ -1,6 +1,26 @@
 import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
+import TaskDetail from './pages/TaskDetail';
+import NotFound from './pages/NotFound';
+import useAuthStore from './store/authStore';
 import './styles/tailwind.css';
+
+// Protected route component
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated } = useAuthStore();
+  
+  if (!isAuthenticated) {
+    // Redirect to login if not authenticated
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+};
 
 function App() {
   // Initialize dark mode from localStorage or system preference
@@ -12,6 +32,16 @@ function App() {
     // Check system preference
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
+
+  // Get user theme preference from auth store
+  const { user } = useAuthStore();
+  
+  // Update dark mode based on user theme preference
+  useEffect(() => {
+    if (user && user.theme) {
+      setDarkMode(user.theme === 'dark');
+    }
+  }, [user]);
 
   // Listen for system preference changes
   useEffect(() => {
@@ -42,8 +72,51 @@ function App() {
     };
   }, []);
 
+  // Save dark mode preference to localStorage
+  useEffect(() => {
+    localStorage.setItem('darkMode', darkMode);
+  }, [darkMode]);
+
   return (
-    <Home darkMode={darkMode} setDarkMode={setDarkMode} />
+    <div className={darkMode ? 'dark' : ''}>
+      <Router>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Home darkMode={darkMode} setDarkMode={setDarkMode} />} />
+          <Route path="/login" element={<Login darkMode={darkMode} />} />
+          <Route path="/signup" element={<Signup darkMode={darkMode} />} />
+          
+          {/* Protected routes */}
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <Dashboard darkMode={darkMode} setDarkMode={setDarkMode} />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/profile" 
+            element={
+              <ProtectedRoute>
+                <Profile darkMode={darkMode} setDarkMode={setDarkMode} />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/tasks/:id" 
+            element={
+              <ProtectedRoute>
+                <TaskDetail darkMode={darkMode} setDarkMode={setDarkMode} />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* 404 route */}
+          <Route path="*" element={<NotFound darkMode={darkMode} />} />
+        </Routes>
+      </Router>
+    </div>
   );
 }
 
