@@ -162,12 +162,22 @@ const HomeScreen = () => {
   const onRefresh = async () => {
     setRefreshing(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    await syncTasks();
-    setRefreshing(false);
     
-    // Show snackbar
-    setSnackbarMessage('Tasks synced successfully');
-    setSnackbarVisible(true);
+    try {
+      await syncTasks();
+      
+      // Force a re-render to update the last synced time
+      setRefreshing(false);
+      
+      // Show snackbar
+      setSnackbarMessage('Tasks synced successfully');
+      setSnackbarVisible(true);
+    } catch (error) {
+      console.error('Sync failed:', error);
+      setSnackbarMessage('Sync failed. Please try again.');
+      setSnackbarVisible(true);
+      setRefreshing(false);
+    }
   };
   
   // Reset form when dialog is opened
@@ -665,16 +675,36 @@ const HomeScreen = () => {
             </Text>
             <Text variant="bodySmall">
               {lastSynced 
-                ? `Last synced: ${new Date(lastSynced).toLocaleTimeString()}` 
+                ? `Last synced: ${new Date(lastSynced).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}` 
                 : 'Not synced yet'}
             </Text>
           </View>
         </View>
         
-        <IconButton 
-          icon={showFilters ? "filter-off" : "filter"} 
-          onPress={() => setShowFilters(!showFilters)}
-        />
+        <View style={styles.headerButtonsContainer}>
+          {refreshing ? (
+            <ActivityIndicator 
+              size={24} 
+              color={theme.colors.primary} 
+              style={[styles.headerButton, styles.syncIndicator]} 
+            />
+          ) : (
+            <IconButton 
+              icon="sync"
+              onPress={onRefresh}
+              style={styles.headerButton}
+            />
+          )}
+          <IconButton 
+            icon="tag-multiple"
+            onPress={() => navigation.navigate('Categories')}
+            style={styles.headerButton}
+          />
+          <IconButton 
+            icon={showFilters ? "filter-off" : "filter"} 
+            onPress={() => setShowFilters(!showFilters)}
+          />
+        </View>
       </View>
       
       {/* Filters section */}
@@ -791,13 +821,24 @@ const HomeScreen = () => {
             </>
           )}
           
-          <Button 
-            mode="outlined" 
-            onPress={() => setShowFilters(false)}
-            style={styles.closeFiltersButton}
-          >
-            Close Filters
-          </Button>
+          <View style={styles.filterButtonsContainer}>
+            <Button 
+              mode="outlined" 
+              onPress={() => navigation.navigate('Categories')}
+              style={styles.manageCategoriesButton}
+              icon="tag-multiple"
+            >
+              Manage Categories
+            </Button>
+            
+            <Button 
+              mode="outlined" 
+              onPress={() => setShowFilters(false)}
+              style={styles.closeFiltersButton}
+            >
+              Close Filters
+            </Button>
+          </View>
         </Animated.View>
       )}
       
@@ -1175,6 +1216,16 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
+  },
+  headerButtonsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerButton: {
+    marginRight: 4,
+  },
+  syncIndicator: {
+    marginHorizontal: 12,
     shadowRadius: 1,
   },
   userInfo: {
@@ -1219,6 +1270,14 @@ const styles = StyleSheet.create({
   categoryFilterChip: {
     marginRight: 8,
     borderWidth: 1,
+  },
+  filterButtonsContainer: {
+    marginTop: 16,
+    flexDirection: 'column',
+    gap: 8,
+  },
+  manageCategoriesButton: {
+    borderColor: '#009688',
   },
   closeFiltersButton: {
     marginTop: 8,
