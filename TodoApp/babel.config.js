@@ -3,14 +3,7 @@ export default function(api) {
   return {
     presets: ['babel-preset-expo'],
     plugins: [
-      [
-        'module-resolver',
-        {
-          alias: {
-            'react-native/Libraries/Components/Slider/Slider': '@react-native-community/slider',
-          },
-        },
-      ],
+      'react-native-reanimated/plugin',
     ],
   };
 };

@@ -84,6 +84,7 @@ const HomeScreen = () => {
   const [newTaskReminder, setNewTaskReminder] = useState(false);
   const [newTaskReminderTime, setNewTaskReminderTime] = useState<Date | undefined>(undefined);
   const [showReminderTimePicker, setShowReminderTimePicker] = useState(false);
+  const [showReminderTimePickerAndroid, setShowReminderTimePickerAndroid] = useState(false);
   
   // UI state
   const [menuVisible, setMenuVisible] = useState<string | null>(null);
@@ -178,6 +179,9 @@ const HomeScreen = () => {
     setNewTaskRecurrence('none');
     setNewTaskReminder(false);
     setNewTaskReminderTime(undefined);
+    setShowDatePicker(false);
+    setShowReminderTimePicker(false);
+    setShowReminderTimePickerAndroid(false);
     setIsEditMode(false);
     setCurrentTaskId(null);
   };
@@ -985,12 +989,42 @@ const HomeScreen = () => {
                       {showReminderTimePicker && (
                         <DateTimePicker
                           value={newTaskReminderTime || new Date()}
-                          mode="datetime"
+                          mode={Platform.OS === 'ios' ? 'datetime' : 'date'}
                           display={Platform.OS === 'ios' ? 'inline' : 'default'}
                           onChange={(event, selectedDate) => {
-                            setShowReminderTimePicker(Platform.OS === 'ios'); // Only keep open on iOS
+                            if (Platform.OS === 'android') {
+                              setShowReminderTimePicker(false);
+                              if (selectedDate) {
+                                // For Android, first pick date, then time
+                                setNewTaskReminderTime(selectedDate);
+                                // Show time picker after date is selected
+                                setTimeout(() => {
+                                  setShowReminderTimePickerAndroid(true);
+                                }, 100);
+                              }
+                            } else {
+                              // iOS behavior
+                              if (selectedDate) {
+                                setNewTaskReminderTime(selectedDate);
+                              }
+                            }
+                          }}
+                        />
+                      )}
+                      
+                      {showReminderTimePickerAndroid && Platform.OS === 'android' && (
+                        <DateTimePicker
+                          value={newTaskReminderTime || new Date()}
+                          mode="time"
+                          display="default"
+                          onChange={(event, selectedDate) => {
+                            setShowReminderTimePickerAndroid(false);
                             if (selectedDate) {
-                              setNewTaskReminderTime(selectedDate);
+                              // Combine the previously selected date with the new time
+                              const combinedDate = new Date(newTaskReminderTime);
+                              combinedDate.setHours(selectedDate.getHours());
+                              combinedDate.setMinutes(selectedDate.getMinutes());
+                              setNewTaskReminderTime(combinedDate);
                             }
                           }}
                         />

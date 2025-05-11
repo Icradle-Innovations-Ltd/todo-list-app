@@ -43,7 +43,10 @@ export const scheduleNotification = async (
       body,
       data,
     },
-    trigger: date,
+    trigger: {
+      type: 'date',
+      date: date,
+    },
   });
 };
 
