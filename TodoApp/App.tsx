@@ -16,18 +16,25 @@ import {
   DarkTheme as NavigationDarkTheme, 
   DefaultTheme as NavigationDefaultTheme 
 } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import HomeScreen from './src/screens/HomeScreen';
 import CategoriesScreen from './src/screens/CategoriesScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
+import DashboardScreen from './src/screens/DashboardScreen';
+import OnboardingScreen from './src/screens/OnboardingScreen';
 import { useAuthStore } from './src/store/authStore';
 
 // Define the navigation stack parameter list
 export type RootStackParamList = {
+  Onboarding: undefined;
   Login: undefined;
   Register: undefined;
   Home: undefined;
   Categories: undefined;
+  Profile: undefined;
+  Dashboard: undefined;
   Settings: undefined;
 };
 
@@ -89,6 +96,21 @@ export default function App() {
   
   const { isAuthenticated, user } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+  
+  // Check if user has completed onboarding
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      try {
+        const value = await AsyncStorage.getItem('hasCompletedOnboarding');
+        setHasCompletedOnboarding(value === 'true');
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+      }
+    };
+    
+    checkOnboarding();
+  }, []);
   
   // Simulate loading state to check authentication
   useEffect(() => {
@@ -144,6 +166,14 @@ export default function App() {
                         onPress={() => navigation.navigate('Categories')} 
                       />
                       <Appbar.Action 
+                        icon="chart-bar" 
+                        onPress={() => navigation.navigate('Dashboard')} 
+                      />
+                      <Appbar.Action 
+                        icon="account" 
+                        onPress={() => navigation.navigate('Profile')} 
+                      />
+                      <Appbar.Action 
                         icon="logout" 
                         onPress={() => useAuthStore.getState().logout()} 
                       />
@@ -159,12 +189,20 @@ export default function App() {
             <>
               <Stack.Screen name="Home" component={HomeScreen} />
               <Stack.Screen name="Categories" component={CategoriesScreen} />
+              <Stack.Screen name="Profile" component={ProfileScreen} />
+              <Stack.Screen name="Dashboard" component={DashboardScreen} />
             </>
           ) : (
             // Auth screens
             <>
-              <Stack.Screen name="Login" component={LoginScreen} />
-              <Stack.Screen name="Register" component={RegisterScreen} />
+              {!hasCompletedOnboarding ? (
+                <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+              ) : (
+                <>
+                  <Stack.Screen name="Login" component={LoginScreen} />
+                  <Stack.Screen name="Register" component={RegisterScreen} />
+                </>
+              )}
             </>
           )}
         </Stack.Navigator>
