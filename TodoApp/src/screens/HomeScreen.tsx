@@ -12,6 +12,7 @@ import {
   ScrollView,
   Animated as RNAnimated
 } from 'react-native';
+import CachedImage from '../components/CachedImage';
 import { 
   Card, 
   Text, 
@@ -364,7 +365,7 @@ const HomeScreen = () => {
             }
             
             const result = await ImagePicker.launchCameraAsync({
-              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              mediaTypes: ImagePicker.MediaType.Images,
               quality: 0.8,
             });
             
@@ -381,7 +382,7 @@ const HomeScreen = () => {
           text: 'Choose from Gallery', 
           onPress: async () => {
             const result = await ImagePicker.launchImageLibraryAsync({
-              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              mediaTypes: ImagePicker.MediaType.Images,
               quality: 0.8,
             });
             
@@ -541,7 +542,10 @@ const HomeScreen = () => {
                     {item.description ? (
                       <Text 
                         variant="bodySmall" 
-                        style={item.completed ? styles.completedText : undefined}
+                        style={[
+                          styles.taskDescription,
+                          item.completed ? styles.completedText : undefined
+                        ]}
                         numberOfLines={2}
                       >
                         {item.description}
@@ -615,10 +619,11 @@ const HomeScreen = () => {
               {item.attachments && item.attachments.length > 0 && (
                 <View style={styles.attachmentsContainer}>
                   {item.attachments.map((uri, index) => (
-                    <Image 
+                    <CachedImage 
                       key={index}
                       source={{ uri }}
                       style={styles.attachmentImage}
+                      placeholderColor="#e0e0e0"
                     />
                   ))}
                 </View>
@@ -843,9 +848,17 @@ const HomeScreen = () => {
           onDismiss={() => setDialogVisible(false)}
           style={styles.dialog}
         >
-          <Dialog.Title>
-            {isEditMode ? 'Edit Task' : 'Add New Task'}
-          </Dialog.Title>
+          <View style={styles.dialogHeader}>
+            <Dialog.Title style={styles.dialogTitle}>
+              {isEditMode ? 'Edit Task' : 'Add New Task'}
+            </Dialog.Title>
+            <IconButton
+              icon="close"
+              size={24}
+              onPress={() => setDialogVisible(false)}
+              style={styles.dialogCloseButton}
+            />
+          </View>
           <Dialog.ScrollArea style={styles.dialogScrollArea}>
             <ScrollView>
               <View style={styles.dialogContent}>
@@ -1213,8 +1226,12 @@ const styles = StyleSheet.create({
   card: {
     marginHorizontal: 16,
     marginTop: 8,
-    borderRadius: 8,
-    elevation: 2,
+    borderRadius: 12,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   completedCard: {
     opacity: 0.7,
@@ -1240,13 +1257,20 @@ const styles = StyleSheet.create({
   taskTitle: {
     flex: 1,
     marginRight: 4,
+    fontSize: 16,
+    fontWeight: '600',
   },
   priorityIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     marginRight: 8,
     marginTop: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
+    elevation: 1,
   },
   reminderIcon: {
     margin: 0,
@@ -1255,6 +1279,12 @@ const styles = StyleSheet.create({
   completedText: {
     textDecorationLine: 'line-through',
     opacity: 0.7,
+  },
+  taskDescription: {
+    marginTop: 4,
+    marginLeft: 4,
+    lineHeight: 18,
+    opacity: 0.8,
   },
   taskMetaContainer: {
     flexDirection: 'row',
@@ -1290,8 +1320,9 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   listContent: {
-    paddingBottom: 80,
+    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
     paddingTop: 8,
+    paddingHorizontal: 8,
   },
   emptyContainer: {
     flex: 1,
@@ -1321,10 +1352,28 @@ const styles = StyleSheet.create({
     position: 'absolute',
     margin: 16,
     right: 0,
-    bottom: 0,
+    bottom: Platform.OS === 'ios' ? 30 : 16, // Add extra padding for iOS
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    zIndex: 999, // Ensure it's above other elements
   },
   dialog: {
     maxHeight: '80%',
+  },
+  dialogHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingRight: 8,
+  },
+  dialogTitle: {
+    flex: 1,
+  },
+  dialogCloseButton: {
+    margin: 0,
   },
   dialogScrollArea: {
     paddingHorizontal: 0,

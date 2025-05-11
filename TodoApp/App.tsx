@@ -10,24 +10,39 @@ import {
   ActivityIndicator,
   adaptNavigationTheme
 } from 'react-native-paper';
-import { useColorScheme, View, StyleSheet } from 'react-native';
+import { useColorScheme, View, StyleSheet, LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { 
   DarkTheme as NavigationDarkTheme, 
   DefaultTheme as NavigationDefaultTheme 
 } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import HomeScreen from './src/screens/HomeScreen';
 import CategoriesScreen from './src/screens/CategoriesScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
+import DashboardScreen from './src/screens/DashboardScreen';
+import OnboardingScreen from './src/screens/OnboardingScreen';
+import NavigationHeader from './src/components/NavigationHeader';
 import { useAuthStore } from './src/store/authStore';
+import { setupImageCache, clearExpiredCache } from './src/utils/cacheUtils';
+
+// Ignore specific warnings
+LogBox.ignoreLogs([
+  'Require cycle:', // Ignore require cycle warnings
+  'AsyncStorage has been extracted from react-native', // Ignore AsyncStorage migration warning
+]);
 
 // Define the navigation stack parameter list
 export type RootStackParamList = {
+  Onboarding: undefined;
   Login: undefined;
   Register: undefined;
   Home: undefined;
   Categories: undefined;
+  Profile: undefined;
+  Dashboard: undefined;
   Settings: undefined;
 };
 
@@ -89,12 +104,33 @@ export default function App() {
   
   const { isAuthenticated, user } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   
-  // Simulate loading state to check authentication
+  // Initialize app - check onboarding status and setup caching
   useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+    const initializeApp = async () => {
+      try {
+        // Setup image cache
+        await setupImageCache();
+        
+        // Clear expired cache items
+        clearExpiredCache().catch(err => console.log('Error clearing expired cache:', err));
+        
+        // Check onboarding status
+        const value = await AsyncStorage.getItem('hasCompletedOnboarding');
+        setHasCompletedOnboarding(value === 'true');
+        
+        // Simulate loading state to check authentication (reduced for better UX)
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 500);
+      } catch (error) {
+        console.error('Error during app initialization:', error);
+        setIsLoading(false);
+      }
+    };
+    
+    initializeApp();
   }, []);
   
   if (isLoading) {
@@ -118,7 +154,7 @@ export default function App() {
           screenOptions={{
             header: ({ navigation, route, options }) => {
               // Don't show header on auth screens
-              if (route.name === 'Login' || route.name === 'Register') {
+              if (route.name === 'Login' || route.name === 'Register' || route.name === 'Onboarding') {
                 return null;
               }
               
@@ -137,11 +173,25 @@ export default function App() {
                     <Appbar.BackAction onPress={() => navigation.goBack()} />
                   )}
                   <Appbar.Content title={title} />
+                  {route.name !== 'Home' && (
+                    <Appbar.Action 
+                      icon="home" 
+                      onPress={() => navigation.navigate('Home')} 
+                    />
+                  )}
                   {route.name === 'Home' && (
                     <>
                       <Appbar.Action 
                         icon="format-list-bulleted" 
                         onPress={() => navigation.navigate('Categories')} 
+                      />
+                      <Appbar.Action 
+                        icon="chart-bar" 
+                        onPress={() => navigation.navigate('Dashboard')} 
+                      />
+                      <Appbar.Action 
+                        icon="account" 
+                        onPress={() => navigation.navigate('Profile')} 
                       />
                       <Appbar.Action 
                         icon="logout" 
@@ -159,12 +209,20 @@ export default function App() {
             <>
               <Stack.Screen name="Home" component={HomeScreen} />
               <Stack.Screen name="Categories" component={CategoriesScreen} />
+              <Stack.Screen name="Profile" component={ProfileScreen} />
+              <Stack.Screen name="Dashboard" component={DashboardScreen} />
             </>
           ) : (
             // Auth screens
             <>
-              <Stack.Screen name="Login" component={LoginScreen} />
-              <Stack.Screen name="Register" component={RegisterScreen} />
+              {!hasCompletedOnboarding ? (
+                <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+              ) : (
+                <>
+                  <Stack.Screen name="Login" component={LoginScreen} />
+                  <Stack.Screen name="Register" component={RegisterScreen} />
+                </>
+              )}
             </>
           )}
         </Stack.Navigator>
