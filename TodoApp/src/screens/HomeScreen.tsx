@@ -35,18 +35,18 @@ import {
   RadioButton,
   Snackbar
 } from 'react-native-paper';
-import { useTaskStore, Task, Priority, RecurrencePattern } from '../store/taskStore.js';
+import { useTaskStore, Task, Priority, RecurrencePattern } from '../store/taskStore';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../App.js';
+import { RootStackParamList } from '../../App';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import * as Calendar from 'expo-calendar';
 import { Swipeable } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut, SlideInRight } from 'react-native-reanimated';
-import { useAuthStore } from '../store/authStore.js';
-import { canUseNotifications, scheduleNotification as scheduleNotificationHelper, requestNotificationPermissions } from '../utils/notificationHelper.js';
+import { useAuthStore } from '../store/authStore';
+import { canUseNotifications, scheduleNotification as scheduleNotificationHelper, requestNotificationPermissions } from '../utils/notificationHelper';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
