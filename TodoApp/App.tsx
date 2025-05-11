@@ -11,6 +11,7 @@ import {
   adaptNavigationTheme
 } from 'react-native-paper';
 import { useColorScheme, View, StyleSheet } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { 
   DarkTheme as NavigationDarkTheme, 
   DefaultTheme as NavigationDefaultTheme 
@@ -98,19 +99,22 @@ export default function App() {
   
   if (isLoading) {
     return (
-      <PaperProvider theme={theme}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      </PaperProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <PaperProvider theme={theme}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+          </View>
+        </PaperProvider>
+      </GestureHandlerRootView>
     );
   }
   
   return (
-    <PaperProvider theme={theme}>
-      <NavigationContainer theme={theme}>
-        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-        <Stack.Navigator
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <PaperProvider theme={theme}>
+        <NavigationContainer theme={theme}>
+          <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+          <Stack.Navigator
           screenOptions={{
             header: ({ navigation, route, options }) => {
               // Don't show header on auth screens
@@ -165,7 +169,8 @@ export default function App() {
           )}
         </Stack.Navigator>
       </NavigationContainer>
-    </PaperProvider>
+      </PaperProvider>
+    </GestureHandlerRootView>
   );
 }
 

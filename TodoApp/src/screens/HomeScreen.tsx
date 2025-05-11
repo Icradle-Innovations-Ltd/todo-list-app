@@ -926,9 +926,9 @@ const HomeScreen = () => {
                     <DateTimePicker
                       value={newTaskDueDate || new Date()}
                       mode="date"
-                      display="default"
+                      display={Platform.OS === 'ios' ? 'inline' : 'default'}
                       onChange={(event, selectedDate) => {
-                        setShowDatePicker(false);
+                        setShowDatePicker(Platform.OS === 'ios'); // Only keep open on iOS
                         if (selectedDate) {
                           setNewTaskDueDate(selectedDate);
                         }
@@ -986,9 +986,9 @@ const HomeScreen = () => {
                         <DateTimePicker
                           value={newTaskReminderTime || new Date()}
                           mode="datetime"
-                          display="default"
+                          display={Platform.OS === 'ios' ? 'inline' : 'default'}
                           onChange={(event, selectedDate) => {
-                            setShowReminderTimePicker(false);
+                            setShowReminderTimePicker(Platform.OS === 'ios'); // Only keep open on iOS
                             if (selectedDate) {
                               setNewTaskReminderTime(selectedDate);
                             }
