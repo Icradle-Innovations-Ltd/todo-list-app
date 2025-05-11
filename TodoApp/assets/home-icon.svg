@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient Background -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7B1FA2" />
+      <stop offset="100%" stop-color="#6200EE" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.3" />
+    </filter>
+  </defs>
+  
+  <!-- Background with rounded corners -->
+  <rect width="1024" height="1024" rx="240" fill="url(#bgGradient)" />
+  
+  <!-- Simplified checklist icon -->
+  <rect x="262" y="212" width="500" height="600" rx="40" fill="white" filter="url(#shadow)" />
+  
+  <!-- Task lines -->
+  <rect x="312" y="312" width="400" height="8" rx="4" fill="#E0E0E0" />
+  <rect x="312" y="412" width="400" height="8" rx="4" fill="#E0E0E0" />
+  <rect x="312" y="512" width="400" height="8" rx="4" fill="#E0E0E0" />
+  <rect x="312" y="612" width="400" height="8" rx="4" fill="#E0E0E0" />
+  
+  <!-- Checkmark circles -->
+  <circle cx="362" cy="282" r="40" fill="#6200EE" stroke="white" stroke-width="8" />
+  <circle cx="362" cy="382" r="40" fill="#E0E0E0" />
+  <circle cx="362" cy="482" r="40" fill="#6200EE" stroke="white" stroke-width="8" />
+  <circle cx="362" cy="582" r="40" fill="#E0E0E0" />
+  
+  <!-- Checkmarks -->
+  <path d="M340 282 L355 297 L385 267" stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M340 482 L355 497 L385 467" stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Task text lines -->
+  <rect x="422" y="272" width="300" height="20" rx="10" fill="#333333" opacity="0.9" />
+  <rect x="422" y="372" width="250" height="20" rx="10" fill="#BBBBBB" opacity="0.7" />
+  <rect x="422" y="472" width="280" height="20" rx="10" fill="#333333" opacity="0.9" />
+  <rect x="422" y="572" width="270" height="20" rx="10" fill="#BBBBBB" opacity="0.7" />
+  
+  <!-- "TM" for Task Master -->
+  <text x="512" y="750" font-family="Arial, sans-serif" font-size="120" font-weight="bold" text-anchor="middle" fill="white">TM</text>
+</svg>

@@ -13,6 +13,8 @@ import {
   Animated as RNAnimated
 } from 'react-native';
 import CachedImage from '../components/CachedImage';
+import PomodoroTimer from '../components/PomodoroTimer';
+import SubtaskList from '../components/SubtaskList';
 import { 
   Card, 
   Text, 
@@ -37,6 +39,7 @@ import {
   Snackbar
 } from 'react-native-paper';
 import { useTaskStore, Task, Priority, RecurrencePattern } from '../store/taskStore';
+import { useSubtaskStore } from '../store/subtaskStore';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
@@ -92,11 +95,12 @@ const HomeScreen = () => {
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [priorityFilter, setPriorityFilter] = useState<Priority | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<'dueDate' | 'priority' | 'createdAt'>('createdAt');
+  const [showPomodoroTimer, setShowPomodoroTimer] = useState(false);
   
   // Category dialog state
   const [categoryDialogVisible, setCategoryDialogVisible] = useState(false);
@@ -158,16 +162,12 @@ const HomeScreen = () => {
     });
   }, [tasks, filter, categoryFilter, priorityFilter, sortBy]);
   
-  // Handle pull-to-refresh
+  // Handle manual refresh
   const onRefresh = async () => {
-    setRefreshing(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     
     try {
       await syncTasks();
-      
-      // Force a re-render to update the last synced time
-      setRefreshing(false);
       
       // Show snackbar
       setSnackbarMessage('Tasks synced successfully');
@@ -176,7 +176,6 @@ const HomeScreen = () => {
       console.error('Sync failed:', error);
       setSnackbarMessage('Sync failed. Please try again.');
       setSnackbarVisible(true);
-      setRefreshing(false);
     }
   };
   
@@ -682,19 +681,16 @@ const HomeScreen = () => {
         </View>
         
         <View style={styles.headerButtonsContainer}>
-          {refreshing ? (
-            <ActivityIndicator 
-              size={24} 
-              color={theme.colors.primary} 
-              style={[styles.headerButton, styles.syncIndicator]} 
-            />
-          ) : (
-            <IconButton 
-              icon="sync"
-              onPress={onRefresh}
-              style={styles.headerButton}
-            />
-          )}
+          <IconButton 
+            icon="sync"
+            onPress={onRefresh}
+            style={styles.headerButton}
+          />
+          <IconButton 
+            icon="timer"
+            onPress={() => setShowPomodoroTimer(true)}
+            style={styles.headerButton}
+          />
           <IconButton 
             icon="tag-multiple"
             onPress={() => navigation.navigate('Categories')}
@@ -872,13 +868,6 @@ const HomeScreen = () => {
           keyExtractor={(item) => item.id}
           renderItem={renderTaskItem}
           contentContainerStyle={styles.listContent}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={[theme.colors.primary]}
-            />
-          }
         />
       )}
       
@@ -1127,6 +1116,10 @@ const HomeScreen = () => {
                     Manage Categories
                   </Button>
                 </View>
+                
+                {isEditMode && currentTaskId && (
+                  <SubtaskList taskId={currentTaskId} />
+                )}
               </View>
             </ScrollView>
           </Dialog.ScrollArea>
@@ -1197,6 +1190,13 @@ const HomeScreen = () => {
       >
         {snackbarMessage}
       </Snackbar>
+      
+      {/* Pomodoro Timer */}
+      {showPomodoroTimer && (
+        <View style={styles.pomodoroContainer}>
+          <PomodoroTimer onClose={() => setShowPomodoroTimer(false)} />
+        </View>
+      )}
     </View>
   );
 };
@@ -1205,6 +1205,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  pomodoroContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    paddingTop: Platform.OS === 'ios' ? 50 : 20, // Add padding for status bar
   },
   header: {
     flexDirection: 'row',

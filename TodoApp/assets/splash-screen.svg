@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="1242" height="2436" viewBox="0 0 1242 2436" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient Background -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7B1FA2" />
+      <stop offset="100%" stop-color="#6200EE" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity="0.3" />
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1242" height="2436" fill="url(#bgGradient)" />
+  
+  <!-- Simplified checklist icon -->
+  <rect x="371" y="918" width="500" height="600" rx="40" fill="white" filter="url(#shadow)" />
+  
+  <!-- Task lines -->
+  <rect x="421" y="1018" width="400" height="8" rx="4" fill="#E0E0E0" />
+  <rect x="421" y="1118" width="400" height="8" rx="4" fill="#E0E0E0" />
+  <rect x="421" y="1218" width="400" height="8" rx="4" fill="#E0E0E0" />
+  <rect x="421" y="1318" width="400" height="8" rx="4" fill="#E0E0E0" />
+  
+  <!-- Checkmark circles -->
+  <circle cx="471" cy="988" r="40" fill="#6200EE" stroke="white" stroke-width="8" />
+  <circle cx="471" cy="1088" r="40" fill="#E0E0E0" />
+  <circle cx="471" cy="1188" r="40" fill="#6200EE" stroke="white" stroke-width="8" />
+  <circle cx="471" cy="1288" r="40" fill="#E0E0E0" />
+  
+  <!-- Checkmarks -->
+  <path d="M449 988 L464 1003 L494 973" stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M449 1188 L464 1203 L494 1173" stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Task text lines -->
+  <rect x="531" y="978" width="300" height="20" rx="10" fill="#333333" opacity="0.9" />
+  <rect x="531" y="1078" width="250" height="20" rx="10" fill="#BBBBBB" opacity="0.7" />
+  <rect x="531" y="1178" width="280" height="20" rx="10" fill="#333333" opacity="0.9" />
+  <rect x="531" y="1278" width="270" height="20" rx="10" fill="#BBBBBB" opacity="0.7" />
+  
+  <!-- App Name -->
+  <text x="621" y="1600" font-family="Arial, sans-serif" font-size="80" font-weight="bold" text-anchor="middle" fill="white">Task Master Pro</text>
+  
+  <!-- Decorative elements -->
+  <circle cx="621" y="1700" r="20" fill="white" opacity="0.2" />
+  <circle cx="671" y="1700" r="15" fill="white" opacity="0.2" />
+  <circle cx="571" y="1700" r="15" fill="white" opacity="0.2" />
+</svg>

@@ -24,8 +24,10 @@ import RegisterScreen from './src/screens/RegisterScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
 import NavigationHeader from './src/components/NavigationHeader';
 import { useAuthStore } from './src/store/authStore';
+import { useThemeStore } from './src/store/themeStore';
 import { setupImageCache, clearExpiredCache } from './src/utils/cacheUtils';
 
 // Ignore specific warnings
@@ -99,8 +101,9 @@ const CustomDarkTheme = {
 };
 
 export default function App() {
-  const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? CustomDarkTheme : CustomLightTheme;
+  const deviceColorScheme = useColorScheme();
+  const { isDarkMode } = useThemeStore();
+  const theme = isDarkMode() ? CustomDarkTheme : CustomLightTheme;
   
   const { isAuthenticated, user } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
@@ -149,7 +152,7 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <PaperProvider theme={theme}>
         <NavigationContainer theme={theme}>
-          <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+          <StatusBar style={isDarkMode() ? 'light' : 'dark'} />
           <Stack.Navigator
           screenOptions={{
             header: ({ navigation, route, options }) => {
@@ -194,6 +197,10 @@ export default function App() {
                         onPress={() => navigation.navigate('Profile')} 
                       />
                       <Appbar.Action 
+                        icon="cog" 
+                        onPress={() => navigation.navigate('Settings')} 
+                      />
+                      <Appbar.Action 
                         icon="logout" 
                         onPress={() => useAuthStore.getState().logout()} 
                       />
@@ -211,6 +218,7 @@ export default function App() {
               <Stack.Screen name="Categories" component={CategoriesScreen} />
               <Stack.Screen name="Profile" component={ProfileScreen} />
               <Stack.Screen name="Dashboard" component={DashboardScreen} />
+              <Stack.Screen name="Settings" component={SettingsScreen} />
             </>
           ) : (
             // Auth screens
