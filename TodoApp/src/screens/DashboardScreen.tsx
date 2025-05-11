@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView, Dimensions, Platform } from 'react-native';
-import { Text, Card, useTheme, ActivityIndicator, Button } from 'react-native-paper';
+import { Text, Card, useTheme, ActivityIndicator, Button, Divider, ProgressBar } from 'react-native-paper';
 import { useTaskStore, Task } from '../store/taskStore';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -199,7 +199,11 @@ const DashboardScreen = ({ navigation }: any) => {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
       <Text style={[styles.header, { color: theme.colors.primary }]}>Task Dashboard</Text>
       
       {/* Summary Cards */}
@@ -233,28 +237,144 @@ const DashboardScreen = ({ navigation }: any) => {
         </Card>
       </View>
       
-      {/* Weekly Activity Chart */}
+      {/* Task Status Distribution Chart */}
       <Card style={styles.chartCard}>
-        <Card.Title title="Weekly Activity" />
+        <Card.Title title="Task Status Distribution" />
         <Card.Content>
-          <View style={styles.textChartContainer}>
-            <Text style={styles.chartTitle}>Weekly Task Activity</Text>
-            <Text style={styles.chartSubtitle}>Created vs Completed Tasks</Text>
-            <View style={styles.legendContainer}>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendColor, { backgroundColor: theme.colors.primary }]} />
-                <Text>Created</Text>
+          {taskStats.total > 0 ? (
+            <View style={styles.statusContainer}>
+              <View style={styles.statusItem}>
+                <Text style={styles.statusLabel}>Active</Text>
+                <View style={styles.progressContainer}>
+                  <ProgressBar 
+                    progress={taskStats.active / taskStats.total} 
+                    color={theme.colors.secondary} 
+                    style={styles.progressBar} 
+                  />
+                </View>
+                <Text style={styles.statusValue}>{taskStats.active} ({Math.round((taskStats.active / taskStats.total) * 100)}%)</Text>
               </View>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendColor, { backgroundColor: theme.colors.secondary }]} />
-                <Text>Completed</Text>
+              
+              <View style={styles.statusItem}>
+                <Text style={styles.statusLabel}>Completed</Text>
+                <View style={styles.progressContainer}>
+                  <ProgressBar 
+                    progress={taskStats.completed / taskStats.total} 
+                    color={theme.colors.tertiary} 
+                    style={styles.progressBar} 
+                  />
+                </View>
+                <Text style={styles.statusValue}>{taskStats.completed} ({Math.round((taskStats.completed / taskStats.total) * 100)}%)</Text>
               </View>
+              
+              <View style={styles.statusItem}>
+                <Text style={styles.statusLabel}>Overdue</Text>
+                <View style={styles.progressContainer}>
+                  <ProgressBar 
+                    progress={taskStats.overdue / taskStats.total} 
+                    color={theme.colors.error} 
+                    style={styles.progressBar} 
+                  />
+                </View>
+                <Text style={styles.statusValue}>{taskStats.overdue} ({Math.round((taskStats.overdue / taskStats.total) * 100)}%)</Text>
+              </View>
+              
+              <Text style={styles.chartDescription}>
+                Distribution of tasks by their current status
+              </Text>
             </View>
-            <Text style={styles.chartDescription}>
-              This week you created {weeklyData.datasets[0].data.reduce((a, b) => a + b, 0)} tasks
-              and completed {weeklyData.datasets[1].data.reduce((a, b) => a + b, 0)} tasks.
-            </Text>
-          </View>
+          ) : (
+            <Text style={styles.noDataText}>No tasks to display</Text>
+          )}
+        </Card.Content>
+      </Card>
+      
+      {/* Weekly Task Activity */}
+      <Card style={styles.chartCard}>
+        <Card.Title title="Weekly Task Activity" />
+        <Card.Content>
+          {taskStats.total > 0 ? (
+            <View style={styles.weeklyContainer}>
+              <View style={styles.weeklyLegend}>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendColor, { backgroundColor: theme.colors.primary }]} />
+                  <Text>Created</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendColor, { backgroundColor: theme.colors.secondary }]} />
+                  <Text>Completed</Text>
+                </View>
+              </View>
+              
+              <View style={styles.weeklyChart}>
+                {weeklyData.labels.map((day, index) => (
+                  <View key={day} style={styles.dayColumn}>
+                    <Text style={styles.dayLabel}>{day}</Text>
+                    <View style={styles.barContainer}>
+                      <View 
+                        style={[
+                          styles.bar, 
+                          { 
+                            height: Math.max(weeklyData.datasets[0].data[index] * 15, 5),
+                            backgroundColor: theme.colors.primary 
+                          }
+                        ]} 
+                      />
+                      <Text style={styles.barValue}>{weeklyData.datasets[0].data[index]}</Text>
+                    </View>
+                    <View style={styles.barContainer}>
+                      <View 
+                        style={[
+                          styles.bar, 
+                          { 
+                            height: Math.max(weeklyData.datasets[1].data[index] * 15, 5),
+                            backgroundColor: theme.colors.secondary 
+                          }
+                        ]} 
+                      />
+                      <Text style={styles.barValue}>{weeklyData.datasets[1].data[index]}</Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+              
+              <Text style={styles.chartDescription}>
+                Task creation and completion trends over the current week
+              </Text>
+            </View>
+          ) : (
+            <Text style={styles.noDataText}>No tasks to display</Text>
+          )}
+        </Card.Content>
+      </Card>
+      
+      {/* Category Distribution */}
+      <Card style={styles.chartCard}>
+        <Card.Title title="Tasks by Category" />
+        <Card.Content>
+          {categoryData.length > 0 ? (
+            <View style={styles.categoryContainer}>
+              {categoryData.map((category, index) => (
+                <View key={category.name} style={styles.categoryItem}>
+                  <View style={styles.categoryHeader}>
+                    <View style={[styles.categoryColor, { backgroundColor: category.color }]} />
+                    <Text style={styles.categoryName}>{category.name}</Text>
+                    <Text style={styles.categoryCount}>{category.count}</Text>
+                  </View>
+                  <ProgressBar 
+                    progress={category.count / taskStats.total} 
+                    color={category.color} 
+                    style={styles.categoryBar} 
+                  />
+                </View>
+              ))}
+              <Text style={styles.chartDescription}>
+                Distribution of tasks across different categories
+              </Text>
+            </View>
+          ) : (
+            <Text style={styles.noDataText}>No category data to display</Text>
+          )}
         </Card.Content>
       </Card>
       
@@ -324,6 +444,9 @@ const DashboardScreen = ({ navigation }: any) => {
           View Tasks
         </Button>
       </View>
+      
+      {/* Extra space at the bottom to ensure content isn't covered by navigation */}
+      <View style={styles.bottomSpacer} />
     </ScrollView>
   );
 };
@@ -332,6 +455,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+  },
+  contentContainer: {
+    paddingBottom: 100, // Add extra padding at the bottom
   },
   centered: {
     justifyContent: 'center',
@@ -353,6 +479,7 @@ const styles = StyleSheet.create({
     width: '48%',
     marginBottom: 16,
     elevation: 2,
+    borderRadius: 8,
   },
   summaryNumber: {
     fontSize: 32,
@@ -367,10 +494,127 @@ const styles = StyleSheet.create({
   chartCard: {
     marginBottom: 16,
     elevation: 2,
+    borderRadius: 8,
   },
   chart: {
     marginVertical: 8,
     borderRadius: 16,
+  },
+  noDataText: {
+    textAlign: 'center',
+    fontSize: 16,
+    opacity: 0.7,
+    padding: 20,
+  },
+  chartDescription: {
+    textAlign: 'center',
+    fontSize: 14,
+    opacity: 0.7,
+    marginTop: 10,
+    marginBottom: 5,
+    paddingHorizontal: 10,
+  },
+  // Status distribution styles
+  statusContainer: {
+    padding: 10,
+  },
+  statusItem: {
+    marginBottom: 15,
+  },
+  statusLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  progressContainer: {
+    height: 20,
+    justifyContent: 'center',
+  },
+  progressBar: {
+    height: 10,
+    borderRadius: 5,
+  },
+  statusValue: {
+    fontSize: 14,
+    marginTop: 5,
+    textAlign: 'right',
+  },
+  // Weekly activity styles
+  weeklyContainer: {
+    padding: 10,
+  },
+  weeklyLegend: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 15,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 10,
+  },
+  legendColor: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginRight: 5,
+  },
+  weeklyChart: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    height: 150,
+    marginBottom: 10,
+  },
+  dayColumn: {
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    flex: 1,
+  },
+  dayLabel: {
+    fontSize: 12,
+    marginBottom: 5,
+  },
+  barContainer: {
+    alignItems: 'center',
+    marginHorizontal: 2,
+  },
+  bar: {
+    width: 15,
+    borderRadius: 3,
+    marginBottom: 2,
+  },
+  barValue: {
+    fontSize: 10,
+  },
+  // Category styles
+  categoryContainer: {
+    padding: 10,
+  },
+  categoryItem: {
+    marginBottom: 15,
+  },
+  categoryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  categoryColor: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  categoryName: {
+    flex: 1,
+    fontSize: 14,
+  },
+  categoryCount: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  categoryBar: {
+    height: 8,
+    borderRadius: 4,
   },
   textChartContainer: {
     padding: 10,
@@ -456,10 +700,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 24,
+    marginTop: 8,
   },
   actionButton: {
     flex: 1,
     marginHorizontal: 8,
+    borderRadius: 8,
+  },
+  bottomSpacer: {
+    height: 50, // Additional space at the bottom
   },
 });
 

@@ -233,7 +233,10 @@ const CategoriesScreen = () => {
             mode="contained"
             onPress={handleAddCategory}
             disabled={!newCategory.trim() || categories.some(c => c.name === newCategory.trim())}
-            style={[styles.addButton, { backgroundColor: theme.colors.primary }]}
+            style={styles.addButton}
+            buttonColor={theme.colors.primary}
+            textColor="white"
+            icon="plus"
           >
             Add Category
           </Button>
@@ -418,11 +421,23 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#ddd',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
   },
   addButton: {
-    marginTop: 8,
+    marginTop: 16,
+    marginBottom: 8,
+    borderRadius: 8,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   divider: {
     marginVertical: 16,
@@ -520,6 +535,11 @@ const styles = StyleSheet.create({
   },
   dialogColorButton: {
     marginLeft: 8,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 3,
+    borderColor: '#ddd',
   },
   deleteAction: {
     justifyContent: 'center',

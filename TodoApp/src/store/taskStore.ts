@@ -33,6 +33,7 @@ interface TaskState {
   isLoading: boolean;
   error: string | null;
   lastSynced: Date | null;
+  cacheTimestamp: number;
   
   // Task operations
   addTask: (task: Omit<Task, 'id' | 'createdAt' | 'lastModified'>) => void;
@@ -71,6 +72,12 @@ const getRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)];
 };
 
+// Cache configuration
+const CACHE_CONFIG = {
+  taskCacheExpiry: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+  categoryCacheExpiry: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+};
+
 export const useTaskStore = create<TaskState>()(
   persist(
     (set, get) => ({
@@ -79,6 +86,7 @@ export const useTaskStore = create<TaskState>()(
       isLoading: false,
       error: null,
       lastSynced: null,
+      cacheTimestamp: Date.now(),
       
       addTask: (task) => 
         set((state) => ({
@@ -220,16 +228,27 @@ export const useTaskStore = create<TaskState>()(
         })),
       
       syncTasks: async () => {
+        // Check if cache is still valid
+        const now = Date.now();
+        const cacheAge = now - get().cacheTimestamp;
+        
+        // If cache is still valid and we have data, don't sync
+        if (cacheAge < CACHE_CONFIG.taskCacheExpiry && get().tasks.length > 0 && !get().isLoading) {
+          console.log('Using cached tasks data');
+          return;
+        }
+        
         set({ isLoading: true, error: null });
         
         try {
           // Simulate API call
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Reduced timeout for better UX
           
           // In a real app, this would sync with a backend
           set({ 
             lastSynced: new Date(),
-            isLoading: false
+            isLoading: false,
+            cacheTimestamp: now
           });
         } catch (error) {
           set({ 
@@ -245,7 +264,8 @@ export const useTaskStore = create<TaskState>()(
       partialize: (state) => ({ 
         tasks: state.tasks, 
         categories: state.categories,
-        lastSynced: state.lastSynced
+        lastSynced: state.lastSynced,
+        cacheTimestamp: state.cacheTimestamp
       }),
     }
   )

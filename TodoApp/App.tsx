@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   adaptNavigationTheme
 } from 'react-native-paper';
-import { useColorScheme, View, StyleSheet } from 'react-native';
+import { useColorScheme, View, StyleSheet, LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { 
   DarkTheme as NavigationDarkTheme, 
@@ -26,6 +26,13 @@ import DashboardScreen from './src/screens/DashboardScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import NavigationHeader from './src/components/NavigationHeader';
 import { useAuthStore } from './src/store/authStore';
+import { setupImageCache, clearExpiredCache } from './src/utils/cacheUtils';
+
+// Ignore specific warnings
+LogBox.ignoreLogs([
+  'Require cycle:', // Ignore require cycle warnings
+  'AsyncStorage has been extracted from react-native', // Ignore AsyncStorage migration warning
+]);
 
 // Define the navigation stack parameter list
 export type RootStackParamList = {
@@ -99,25 +106,31 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   
-  // Check if user has completed onboarding
+  // Initialize app - check onboarding status and setup caching
   useEffect(() => {
-    const checkOnboarding = async () => {
+    const initializeApp = async () => {
       try {
+        // Setup image cache
+        await setupImageCache();
+        
+        // Clear expired cache items
+        clearExpiredCache().catch(err => console.log('Error clearing expired cache:', err));
+        
+        // Check onboarding status
         const value = await AsyncStorage.getItem('hasCompletedOnboarding');
         setHasCompletedOnboarding(value === 'true');
+        
+        // Simulate loading state to check authentication (reduced for better UX)
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 500);
       } catch (error) {
-        console.error('Error checking onboarding status:', error);
+        console.error('Error during app initialization:', error);
+        setIsLoading(false);
       }
     };
     
-    checkOnboarding();
-  }, []);
-  
-  // Simulate loading state to check authentication
-  useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+    initializeApp();
   }, []);
   
   if (isLoading) {

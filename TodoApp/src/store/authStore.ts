@@ -18,6 +18,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<boolean>;
   register: (username: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
+  updateUser: (updatedUser: User) => void;
   
   // Biometric authentication
   enableBiometric: () => void;
@@ -100,6 +101,22 @@ export const useAuthStore = create<AuthState>()(
           user: null, 
           isAuthenticated: false 
         });
+      },
+      
+      updateUser: (updatedUser: User) => {
+        // Update the user in the store
+        set({ user: updatedUser });
+        
+        // In a real app, this would also update the user in the backend
+        // Update the mock user database for demo purposes
+        const userIndex = MOCK_USERS.findIndex(u => u.id === updatedUser.id);
+        if (userIndex !== -1) {
+          MOCK_USERS[userIndex] = {
+            ...MOCK_USERS[userIndex],
+            username: updatedUser.username,
+            email: updatedUser.email
+          };
+        }
       },
       
       enableBiometric: () => {
