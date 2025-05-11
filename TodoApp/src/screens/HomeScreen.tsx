@@ -364,7 +364,7 @@ const HomeScreen = () => {
             }
             
             const result = await ImagePicker.launchCameraAsync({
-              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              mediaTypes: ImagePicker.MediaType.Images,
               quality: 0.8,
             });
             
@@ -381,7 +381,7 @@ const HomeScreen = () => {
           text: 'Choose from Gallery', 
           onPress: async () => {
             const result = await ImagePicker.launchImageLibraryAsync({
-              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              mediaTypes: ImagePicker.MediaType.Images,
               quality: 0.8,
             });
             
@@ -843,9 +843,17 @@ const HomeScreen = () => {
           onDismiss={() => setDialogVisible(false)}
           style={styles.dialog}
         >
-          <Dialog.Title>
-            {isEditMode ? 'Edit Task' : 'Add New Task'}
-          </Dialog.Title>
+          <View style={styles.dialogHeader}>
+            <Dialog.Title style={styles.dialogTitle}>
+              {isEditMode ? 'Edit Task' : 'Add New Task'}
+            </Dialog.Title>
+            <IconButton
+              icon="close"
+              size={24}
+              onPress={() => setDialogVisible(false)}
+              style={styles.dialogCloseButton}
+            />
+          </View>
           <Dialog.ScrollArea style={styles.dialogScrollArea}>
             <ScrollView>
               <View style={styles.dialogContent}>
@@ -1325,6 +1333,18 @@ const styles = StyleSheet.create({
   },
   dialog: {
     maxHeight: '80%',
+  },
+  dialogHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingRight: 8,
+  },
+  dialogTitle: {
+    flex: 1,
+  },
+  dialogCloseButton: {
+    margin: 0,
   },
   dialogScrollArea: {
     paddingHorizontal: 0,

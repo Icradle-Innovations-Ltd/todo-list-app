@@ -24,6 +24,7 @@ import RegisterScreen from './src/screens/RegisterScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
+import NavigationHeader from './src/components/NavigationHeader';
 import { useAuthStore } from './src/store/authStore';
 
 // Define the navigation stack parameter list
@@ -140,7 +141,7 @@ export default function App() {
           screenOptions={{
             header: ({ navigation, route, options }) => {
               // Don't show header on auth screens
-              if (route.name === 'Login' || route.name === 'Register') {
+              if (route.name === 'Login' || route.name === 'Register' || route.name === 'Onboarding') {
                 return null;
               }
               
@@ -159,6 +160,12 @@ export default function App() {
                     <Appbar.BackAction onPress={() => navigation.goBack()} />
                   )}
                   <Appbar.Content title={title} />
+                  {route.name !== 'Home' && (
+                    <Appbar.Action 
+                      icon="home" 
+                      onPress={() => navigation.navigate('Home')} 
+                    />
+                  )}
                   {route.name === 'Home' && (
                     <>
                       <Appbar.Action 
