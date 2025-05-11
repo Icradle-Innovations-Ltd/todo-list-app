@@ -1,15 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView, Dimensions, Platform } from 'react-native';
-import { Text, Card, useTheme, ActivityIndicator, Button, Divider, ProgressBar } from 'react-native-paper';
+import { 
+  Text, 
+  Card, 
+  useTheme, 
+  ActivityIndicator, 
+  Button, 
+  Divider, 
+  ProgressBar,
+  IconButton,
+  Avatar
+} from 'react-native-paper';
 import { useTaskStore, Task } from '../store/taskStore';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import * as Haptics from 'expo-haptics';
+import { useAuthStore } from '../store/authStore';
 
 const { width } = Dimensions.get('window');
 
-const DashboardScreen = ({ navigation }: any) => {
+const DashboardScreen = () => {
   const theme = useTheme();
-  const { tasks } = useTaskStore();
+  const navigation = useNavigation();
+  const { user } = useAuthStore();
+  const { tasks, syncTasks, lastSynced } = useTaskStore();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [taskStats, setTaskStats] = useState({
     total: 0,
     completed: 0,
@@ -177,6 +192,23 @@ const DashboardScreen = ({ navigation }: any) => {
     
     setCategoryData(pieData);
   };
+  
+  // Handle pull-to-refresh
+  const onRefresh = async () => {
+    setRefreshing(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
+    try {
+      await syncTasks();
+      calculateStats();
+      
+      // Force a re-render to update the last synced time
+      setRefreshing(false);
+    } catch (error) {
+      console.error('Sync failed:', error);
+      setRefreshing(false);
+    }
+  };
 
   const chartConfig = {
     backgroundGradientFrom: theme.colors.background,
@@ -199,12 +231,59 @@ const DashboardScreen = ({ navigation }: any) => {
   }
 
   return (
-    <ScrollView 
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      showsVerticalScrollIndicator={false}
-    >
-      <Text style={[styles.header, { color: theme.colors.primary }]}>Task Dashboard</Text>
+    <View style={styles.container}>
+      {/* Header with user info and buttons */}
+      <View style={styles.header}>
+        <View style={styles.userInfo}>
+          <Avatar.Text 
+            size={40} 
+            label={user?.username.substring(0, 2).toUpperCase() || 'U'} 
+            backgroundColor={theme.colors.primary}
+          />
+          <View style={styles.userTextContainer}>
+            <Text variant="titleMedium">
+              {user?.username || 'User'}
+            </Text>
+            <Text variant="bodySmall">
+              {lastSynced 
+                ? `Last synced: ${new Date(lastSynced).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}` 
+                : 'Not synced yet'}
+            </Text>
+          </View>
+        </View>
+        
+        <View style={styles.headerButtonsContainer}>
+          {refreshing ? (
+            <ActivityIndicator 
+              size={24} 
+              color={theme.colors.primary} 
+              style={[styles.headerButton, styles.syncIndicator]} 
+            />
+          ) : (
+            <IconButton 
+              icon="sync"
+              onPress={onRefresh}
+              style={styles.headerButton}
+            />
+          )}
+          <IconButton 
+            icon="tag-multiple"
+            onPress={() => navigation.navigate('Categories' as never)}
+            style={styles.headerButton}
+          />
+          <IconButton 
+            icon="home"
+            onPress={() => navigation.navigate('Home' as never)}
+          />
+        </View>
+      </View>
+      
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={[styles.dashboardTitle, { color: theme.colors.primary }]}>Task Dashboard</Text>
       
       {/* Summary Cards */}
       <View style={styles.summaryContainer}>
@@ -447,12 +526,16 @@ const DashboardScreen = ({ navigation }: any) => {
       
       {/* Extra space at the bottom to ensure content isn't covered by navigation */}
       <View style={styles.bottomSpacer} />
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  scrollView: {
     flex: 1,
     padding: 16,
   },
@@ -464,6 +547,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#fff',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  userTextContainer: {
+    marginLeft: 12,
+  },
+  headerButtonsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerButton: {
+    marginRight: 4,
+  },
+  syncIndicator: {
+    marginHorizontal: 12,
+  },
+  dashboardTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,

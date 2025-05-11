@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { 
   Card, 
   Text, 
@@ -18,9 +18,34 @@ import {
 } from 'react-native-paper';
 import { useTaskStore, Category } from '../store/taskStore';
 import * as Haptics from 'expo-haptics';
-import { ColorPicker, fromHsv } from 'react-native-color-picker';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { Swipeable } from 'react-native-gesture-handler';
+
+// Predefined color palette
+const COLORS = [
+  // Reds
+  '#FF0000', '#FF3333', '#FF6666', '#FF9999', 
+  // Pinks
+  '#FF00FF', '#FF33FF', '#FF66FF', '#FF99FF', 
+  // Purples
+  '#9900CC', '#9933FF', '#9966FF', '#9999FF', 
+  // Blues
+  '#0000FF', '#3333FF', '#6666FF', '#9999FF', 
+  // Light Blues
+  '#00CCFF', '#33CCFF', '#66CCFF', '#99CCFF', 
+  // Greens
+  '#00FF00', '#33FF33', '#66FF66', '#99FF99', 
+  // Light Greens
+  '#00CC66', '#33CC66', '#66CC66', '#99CC99', 
+  // Yellows
+  '#FFFF00', '#FFFF33', '#FFFF66', '#FFFF99', 
+  // Oranges
+  '#FF9900', '#FF9933', '#FF9966', '#FF9999', 
+  // Browns
+  '#996633', '#996666', '#996699', '#9999CC', 
+  // Grays
+  '#333333', '#666666', '#999999', '#CCCCCC', '#FFFFFF',
+];
 
 const CategoriesScreen = () => {
   const theme = useTheme();
@@ -224,10 +249,15 @@ const CategoriesScreen = () => {
               style={styles.input}
               mode="outlined"
             />
-            <TouchableOpacity
-              style={[styles.colorButton, { backgroundColor: selectedColor }]}
-              onPress={() => setColorPickerVisible(true)}
-            />
+            <View style={styles.colorButtonContainer}>
+              <Text variant="bodySmall" style={styles.colorButtonLabel}>Color:</Text>
+              <TouchableOpacity
+                style={[styles.colorButton, { backgroundColor: selectedColor }]}
+                onPress={() => setColorPickerVisible(true)}
+              >
+                <Text style={styles.colorButtonText}>Pick</Text>
+              </TouchableOpacity>
+            </View>
           </View>
           <Button
             mode="contained"
@@ -280,20 +310,33 @@ const CategoriesScreen = () => {
           <Dialog.Title>Choose a Color</Dialog.Title>
           <Dialog.Content>
             <View style={styles.colorPickerContainer}>
-              <ColorPicker
-                onColorChange={color => setSelectedColor(fromHsv(color))}
-                style={styles.colorPicker}
-                defaultColor={selectedColor}
-              />
-              <View style={styles.colorPreview}>
+              <Text variant="titleMedium" style={styles.colorPickerTitle}>Select a Color</Text>
+              
+              <View style={styles.selectedColorContainer}>
                 <Text variant="bodyMedium">Selected Color:</Text>
                 <View 
                   style={[
-                    styles.colorPreviewBox, 
+                    styles.selectedColorPreview, 
                     { backgroundColor: selectedColor }
                   ]} 
                 />
               </View>
+              
+              <ScrollView style={styles.paletteContainer}>
+                <View style={styles.colorGrid}>
+                  {COLORS.map((color, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={[
+                        styles.colorOption,
+                        { backgroundColor: color },
+                        selectedColor === color && styles.selectedColorOption
+                      ]}
+                      onPress={() => setSelectedColor(color)}
+                    />
+                  ))}
+                </View>
+              </ScrollView>
             </View>
           </Dialog.Content>
           <Dialog.Actions>
@@ -417,17 +460,34 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 8,
   },
+  colorButtonContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  colorButtonLabel: {
+    marginBottom: 4,
+  },
   colorButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     borderWidth: 2,
     borderColor: '#ddd',
-    elevation: 2,
+    elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  colorButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   addButton: {
     marginTop: 16,
@@ -545,6 +605,50 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: 80,
+  },
+  // New color picker styles
+  colorPickerTitle: {
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  selectedColorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  selectedColorPreview: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginLeft: 10,
+    borderWidth: 2,
+    borderColor: '#ddd',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
+  },
+  paletteContainer: {
+    maxHeight: 300,
+  },
+  colorGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  colorOption: {
+    width: 40,
+    height: 40,
+    margin: 5,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  selectedColorOption: {
+    borderWidth: 3,
+    borderColor: '#000',
   },
 });
 

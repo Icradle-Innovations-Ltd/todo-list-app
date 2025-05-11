@@ -228,15 +228,8 @@ export const useTaskStore = create<TaskState>()(
         })),
       
       syncTasks: async () => {
-        // Check if cache is still valid
+        // Always update the sync time when manually syncing
         const now = Date.now();
-        const cacheAge = now - get().cacheTimestamp;
-        
-        // If cache is still valid and we have data, don't sync
-        if (cacheAge < CACHE_CONFIG.taskCacheExpiry && get().tasks.length > 0 && !get().isLoading) {
-          console.log('Using cached tasks data');
-          return;
-        }
         
         set({ isLoading: true, error: null });
         
@@ -245,16 +238,22 @@ export const useTaskStore = create<TaskState>()(
           await new Promise(resolve => setTimeout(resolve, 1000)); // Reduced timeout for better UX
           
           // In a real app, this would sync with a backend
+          const currentDate = new Date();
+          
           set({ 
-            lastSynced: new Date(),
+            lastSynced: currentDate,
             isLoading: false,
             cacheTimestamp: now
           });
+          
+          console.log('Synced at:', currentDate.toLocaleTimeString());
+          return currentDate; // Return the sync time for immediate UI updates
         } catch (error) {
           set({ 
             error: 'Failed to sync tasks',
             isLoading: false
           });
+          throw error;
         }
       },
     }),
