@@ -1,8 +1,8 @@
-# Todo List App - User Guide
+# QuickDone - User Guide
 
 ## Getting Started
 
-Welcome to the Todo List App! This guide will help you get started with using the app to manage your tasks efficiently.
+Welcome to QuickDone! This guide will help you get started with using the app to manage your tasks efficiently.
 
 ## Installation
 
@@ -124,7 +124,7 @@ Yes, your task data is stored locally on your device and is not shared with any 
 
 ## Updates and New Features
 
-We're constantly working to improve the Todo List App. Here are some features coming in future updates:
+We're constantly working to improve QuickDone. Here are some features coming in future updates:
 
 - Task categories and tags
 - Reminder notifications
@@ -136,16 +136,24 @@ We're constantly working to improve the Todo List App. Here are some features co
 
 If you need assistance or want to provide feedback:
 
-- Email: support@todolistapp.com
-- Website: www.todolistapp.com/support
+- Email: info@icradleinnovations.com
+- Website: www.icradleinnovations.com/support
 - In-app: Settings > Help & Support
+
+## Permissions
+
+QuickDone requires the following permissions to provide its full functionality:
+
+- **Camera Permission**: Used to take photos to attach to tasks
+- **Calendar Permission**: Used to sync tasks with your calendar
+- **Storage Permission**: Used to save task attachments and app data
 
 ## Privacy Policy
 
 To view our privacy policy, please visit:
-www.todolistapp.com/privacy
+www.icradleinnovations.com/privacy-policy
 
 ## Terms of Service
 
 To view our terms of service, please visit:
-www.todolistapp.com/terms
+www.icradleinnovations.com/terms
