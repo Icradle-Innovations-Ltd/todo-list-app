@@ -11,11 +11,20 @@ export const setupImageCache = async () => {
   try {
     const dirInfo = await FileSystem.getInfoAsync(IMAGE_CACHE_DIRECTORY);
     if (!dirInfo.exists) {
-      await FileSystem.makeDirectoryAsync(IMAGE_CACHE_DIRECTORY, { intermediates: true });
-      console.log('Created image cache directory');
+      try {
+        await FileSystem.makeDirectoryAsync(IMAGE_CACHE_DIRECTORY, { intermediates: true });
+        console.log('Created image cache directory');
+      } catch (dirError) {
+        console.error('Failed to create image cache directory:', dirError);
+        // Throw the error to be caught by the outer try-catch
+        throw dirError;
+      }
     }
+    return true;
   } catch (error) {
     console.error('Failed to setup image cache directory:', error);
+    // Return false to indicate failure, so the app can handle it appropriately
+    return false;
   }
 };
 

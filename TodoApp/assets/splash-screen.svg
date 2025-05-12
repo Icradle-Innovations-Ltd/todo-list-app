@@ -11,8 +11,8 @@
     </filter>
   </defs>
   
-  <!-- Background -->
-  <rect width="1242" height="2436" fill="url(#bgGradient)" />
+  <!-- Full screen background with extra padding to ensure coverage -->
+  <rect x="-50" y="-50" width="1342" height="2536" fill="url(#bgGradient)" />
   
   <!-- Simplified checklist icon -->
   <rect x="371" y="918" width="500" height="600" rx="40" fill="white" filter="url(#shadow)" />
@@ -40,7 +40,7 @@
   <rect x="531" y="1278" width="270" height="20" rx="10" fill="#BBBBBB" opacity="0.7" />
   
   <!-- App Name -->
-  <text x="621" y="1600" font-family="Arial, sans-serif" font-size="80" font-weight="bold" text-anchor="middle" fill="white">Task Master Pro</text>
+  <text x="621" y="1600" font-family="Arial, sans-serif" font-size="80" font-weight="bold" text-anchor="middle" fill="white">QuickDone</text>
   
   <!-- Decorative elements -->
   <circle cx="621" y="1700" r="20" fill="white" opacity="0.2" />

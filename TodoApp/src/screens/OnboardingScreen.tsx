@@ -8,6 +8,7 @@ import Animated, {
   Extrapolate
 } from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 import { 
   OnboardingImage1, 
   OnboardingImage2, 
@@ -44,8 +45,9 @@ const onboardingData = [
   },
 ];
 
-const OnboardingScreen = ({ navigation }: any) => {
+const OnboardingScreen = () => {
   const theme = useTheme();
+  const navigation = useNavigation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const scrollX = useSharedValue(0);
@@ -77,18 +79,17 @@ const OnboardingScreen = ({ navigation }: any) => {
 
   const completeOnboarding = async () => {
     try {
+      // Set the value in AsyncStorage
       await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
-      // Just set the state instead of navigating
-      setHasCompletedOnboarding(true);
+      
+      console.log('Onboarding completed, navigating to Register screen...');
+      
+      // Navigate to the Register screen
+      // @ts-ignore - We know this screen exists in our navigation stack
+      navigation.navigate('Register');
     } catch (error) {
       console.error('Error saving onboarding status:', error);
     }
-  };
-  
-  // Add this to access the global state
-  const setHasCompletedOnboarding = (value: boolean) => {
-    // This will trigger a re-render in App.tsx
-    AsyncStorage.setItem('hasCompletedOnboarding', value ? 'true' : 'false');
   };
 
   const renderItem = ({ item, index }: any) => {

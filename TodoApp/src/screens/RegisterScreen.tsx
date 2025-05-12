@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, ScrollView } from 'react-native';
-import { TextInput, Button, Text, useTheme, HelperText } from 'react-native-paper';
+import { TextInput, Button, Text, useTheme, HelperText, Checkbox } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 import { useAuthStore } from '../store/authStore';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { loadSampleData } from '../utils/loadSampleData';
 
 type RegisterScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Register'>;
 
@@ -20,6 +21,7 @@ const RegisterScreen = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loadSampleTasks, setLoadSampleTasks] = useState(true);
   
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -58,7 +60,12 @@ const RegisterScreen = () => {
     try {
       const success = await register(username, email, password);
       
-      if (!success) {
+      if (success) {
+        // If registration was successful and the user wants sample data
+        if (loadSampleTasks) {
+          await loadSampleData();
+        }
+      } else {
         setErrors({
           ...errors,
           email: 'Email already in use'
@@ -155,6 +162,28 @@ const RegisterScreen = () => {
             </HelperText>
           ) : null}
           
+          <View style={styles.checkboxContainer}>
+            <Checkbox
+              status={loadSampleTasks ? 'checked' : 'unchecked'}
+              onPress={() => setLoadSampleTasks(!loadSampleTasks)}
+              color={theme.colors.primary}
+            />
+            <View style={styles.checkboxTextContainer}>
+              <Text 
+                style={styles.checkboxLabel}
+                onPress={() => setLoadSampleTasks(!loadSampleTasks)}
+              >
+                Add sample tasks to get started
+              </Text>
+              <Text 
+                style={styles.checkboxDescription}
+                onPress={() => setLoadSampleTasks(!loadSampleTasks)}
+              >
+                Includes tasks for work, study, fitness, coding, home, and daily habits
+              </Text>
+            </View>
+          </View>
+          
           <Button
             mode="contained"
             onPress={handleRegister}
@@ -202,6 +231,25 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: 8,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  checkboxTextContainer: {
+    flex: 1,
+    marginLeft: 8,
+  },
+  checkboxLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  checkboxDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 2,
   },
   button: {
     marginTop: 16,

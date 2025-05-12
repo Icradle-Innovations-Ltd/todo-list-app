@@ -257,16 +257,32 @@ const HomeScreen = () => {
     // Set reminder notification if enabled
     if (newTaskReminder && newTaskReminderTime) {
       const taskId = currentTaskId || Date.now().toString();
-      await scheduleNotification(taskId, newTaskTitle, newTaskReminderTime);
+      const notificationScheduled = await scheduleNotification(taskId, newTaskTitle, newTaskReminderTime);
       
-      // Add to calendar if permission granted
-      if (calendarPermission) {
-        await addEventToCalendar(
-          newTaskTitle,
-          newTaskDescription,
-          newTaskReminderTime,
-          newTaskDueDate || newTaskReminderTime
-        );
+      // Only try to add to calendar if notification was scheduled successfully
+      if (notificationScheduled && calendarPermission) {
+        try {
+          await addEventToCalendar(
+            newTaskTitle,
+            newTaskDescription,
+            newTaskReminderTime,
+            newTaskDueDate || newTaskReminderTime
+          );
+        } catch (calendarError) {
+          console.error('Failed to add event to calendar:', calendarError);
+          // Show a non-blocking error message
+          setSnackbarMessage('Could not add reminder to calendar');
+          setSnackbarVisible(true);
+        }
+      }
+      
+      // If notification wasn't scheduled, update the task to reflect that
+      if (!notificationScheduled && (isEditMode && currentTaskId)) {
+        updateTask(currentTaskId, {
+          ...taskData,
+          reminderSet: false,
+          reminderTime: undefined
+        });
       }
     }
     
@@ -279,6 +295,23 @@ const HomeScreen = () => {
   // Schedule a notification
   const scheduleNotification = async (taskId: string, title: string, date: Date) => {
     try {
+      // Validate inputs
+      if (!taskId || !title || !date) {
+        console.error('Invalid notification parameters:', { taskId, title, date });
+        throw new Error('Invalid notification parameters');
+      }
+      
+      // Check if date is in the past
+      if (date.getTime() < Date.now()) {
+        console.warn('Notification time is in the past:', date.toLocaleString());
+        Alert.alert(
+          'Invalid Reminder Time',
+          'The reminder time you selected is in the past. Please choose a future time.',
+          [{ text: 'OK' }]
+        );
+        return false;
+      }
+      
       // If we're in Expo Go on Android, just show an alert instead of scheduling a notification
       if (!canUseNotifications) {
         console.log('Notification would be scheduled for:', title, 'at', date.toLocaleString());
@@ -287,17 +320,20 @@ const HomeScreen = () => {
           `A reminder for "${title}" would be set for ${date.toLocaleString()}.\n\nNote: Push notifications are not supported in Expo Go on Android. Use a development build for full functionality.`,
           [{ text: 'OK' }]
         );
-        return;
+        return true;
       }
       
       // Schedule the notification using our helper
-      await scheduleNotificationHelper('Task Reminder', title, date, { taskId });
+      const notificationId = await scheduleNotificationHelper('Task Reminder', title, date, { taskId });
+      console.log('Scheduled notification with ID:', notificationId);
+      return true;
     } catch (error) {
       console.error('Failed to schedule notification:', error);
       Alert.alert(
         'Notification Error',
         'Could not schedule notification. Push notifications may not be fully supported in this environment.'
       );
+      return false;
     }
   };
   
@@ -309,20 +345,44 @@ const HomeScreen = () => {
     endDate: Date
   ) => {
     try {
+      // Validate inputs
+      if (!title || !startDate || !endDate) {
+        throw new Error('Invalid calendar event parameters');
+      }
+      
+      // Check if dates are valid
+      if (startDate.getTime() > endDate.getTime()) {
+        throw new Error('Start date cannot be after end date');
+      }
+      
+      // Get available calendars
       const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
+      
+      if (!calendars || calendars.length === 0) {
+        throw new Error('No calendars available');
+      }
+      
+      // Find a suitable calendar
       const defaultCalendar = calendars.find(cal => cal.isPrimary) || calendars[0];
       
-      if (defaultCalendar) {
-        await Calendar.createEventAsync(defaultCalendar.id, {
-          title,
-          notes,
-          startDate,
-          endDate,
-          alarms: [{ relativeOffset: -30 }], // 30 minutes before
-        });
+      if (!defaultCalendar) {
+        throw new Error('No default calendar found');
       }
+      
+      // Create the event
+      const eventId = await Calendar.createEventAsync(defaultCalendar.id, {
+        title,
+        notes,
+        startDate,
+        endDate,
+        alarms: [{ relativeOffset: -30 }], // 30 minutes before
+      });
+      
+      console.log('Added event to calendar with ID:', eventId);
+      return eventId;
     } catch (error) {
       console.error('Error adding event to calendar:', error);
+      throw error; // Re-throw to allow the caller to handle it
     }
   };
   
