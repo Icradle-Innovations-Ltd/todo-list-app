@@ -270,6 +270,89 @@ yarn e2e
    npx eas submit --platform android
    ```
 
+## Signing Android APK for Distribution
+
+To distribute your Android app, you need to sign it with a production keystore. Follow these steps:
+
+### 1. Generate a Production Keystore
+
+```bash
+keytool -genkeypair -v -storetype PKCS12 -keystore my-release-key.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
+```
+
+You will be prompted to:
+- Create a password for the keystore
+- Enter your name, organization, and location information
+- Create a password for the key (can be the same as the keystore password)
+
+**IMPORTANT**: Store this keystore file and passwords securely. If you lose them, you won't be able to update your app on the Play Store.
+
+### 2. Configure Gradle for Release Signing
+
+Edit `android/app/build.gradle` to add your signing configuration:
+
+```gradle
+android {
+    ...
+    signingConfigs {
+        debug {
+            ...
+        }
+        release {
+            storeFile file('my-release-key.keystore')
+            storePassword 'your-keystore-password'
+            keyAlias 'my-key-alias'
+            keyPassword 'your-key-password'
+        }
+    }
+    buildTypes {
+        debug {
+            ...
+        }
+        release {
+            signingConfig signingConfigs.release
+            ...
+        }
+    }
+}
+```
+
+For better security, you can store passwords in `gradle.properties` and reference them:
+
+```gradle
+// In gradle.properties (DO NOT commit this file to version control)
+MYAPP_RELEASE_STORE_PASSWORD=your-keystore-password
+MYAPP_RELEASE_KEY_PASSWORD=your-key-password
+
+// In build.gradle
+release {
+    storeFile file('my-release-key.keystore')
+    storePassword MYAPP_RELEASE_STORE_PASSWORD
+    keyAlias 'my-key-alias'
+    keyPassword MYAPP_RELEASE_KEY_PASSWORD
+}
+```
+
+### 3. Generate a Signed APK
+
+```bash
+cd android
+./gradlew assembleRelease
+```
+
+The signed APK will be located at:
+```
+android/app/build/outputs/apk/release/app-release.apk
+```
+
+### 4. Verify the Signed APK
+
+You can verify the APK is signed correctly using:
+
+```bash
+jarsigner -verify -verbose -certs android/app/build/outputs/apk/release/app-release.apk
+```
+
 ## Troubleshooting
 
 ### Common Development Issues
