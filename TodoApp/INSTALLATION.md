@@ -67,30 +67,104 @@ This guide provides detailed instructions for installing and setting up the Todo
 
 ### Building for Development
 
-#### Android Development Build
+#### Using EAS Build (Cloud)
 
+##### Android Development Build
 ```bash
 npx eas build --platform android --profile development
 ```
 
-#### iOS Development Build
-
+##### iOS Development Build
 ```bash
 npx eas build --platform ios --profile development
 ```
 
+#### Local Development Builds
+
+##### Android Development APK
+```bash
+# Navigate to the android directory
+cd android
+
+# Build debug APK
+./gradlew assembleDebug
+
+# The APK will be available at:
+# android/app/build/outputs/apk/debug/app-debug.apk
+```
+
 ### Building for Production
 
-#### Android Production Build
+#### Using EAS Build (Cloud)
 
+##### Android Production Build
 ```bash
 npx eas build --platform android --profile production
 ```
 
-#### iOS Production Build
-
+##### iOS Production Build
 ```bash
 npx eas build --platform ios --profile production
+```
+
+#### Local Production Builds
+
+##### Android Production APK
+```bash
+# Navigate to the android directory
+cd android
+
+# Build release APK
+./gradlew assembleRelease
+
+# The APK will be available at:
+# android/app/build/outputs/apk/release/app-release.apk
+```
+
+### Building Android App Bundle (AAB) for Google Play
+
+```bash
+# Navigate to the android directory
+cd android
+
+# Build release bundle
+./gradlew bundleRelease
+
+# The AAB will be available at:
+# android/app/build/outputs/bundle/release/app-release.aab
+```
+
+### Signing Android Builds
+
+For production builds, you need to create a keystore file:
+
+```bash
+# Generate a keystore file (only needed once)
+keytool -genkeypair -v -storetype PKCS12 -keystore my-upload-key.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
+
+# Place the keystore file in android/app directory
+```
+
+Configure the signing in `android/app/build.gradle`:
+
+```gradle
+android {
+    ...
+    signingConfigs {
+        release {
+            storeFile file('my-upload-key.keystore')
+            storePassword 'your-keystore-password'
+            keyAlias 'my-key-alias'
+            keyPassword 'your-key-password'
+        }
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            ...
+        }
+    }
+}
 ```
 
 ## System Requirements
