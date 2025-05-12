@@ -1,7 +1,7 @@
-# Todo List App Documentation
+# QuickDone - Todo List App
 
 ## Overview
-The Todo List App is a mobile application built with React Native and Expo that helps users manage their tasks efficiently. The app allows users to create, edit, delete, and organize tasks with a clean and intuitive interface.
+QuickDone is a mobile application built with React Native and Expo that helps users manage their tasks efficiently. The app allows users to create, edit, delete, and organize tasks with a clean and intuitive interface.
 
 ## Features
 - **Task Management**: Create, edit, and delete tasks
@@ -9,6 +9,9 @@ The Todo List App is a mobile application built with React Native and Expo that 
 - **User-Friendly Interface**: Clean and intuitive design for easy navigation
 - **Persistent Storage**: Tasks are saved locally on the device
 - **Cross-Platform**: Works on both Android and iOS devices
+- **Camera Integration**: Attach photos to tasks
+- **Calendar Integration**: Sync tasks with your calendar
+- **Storage Access**: Save and manage task attachments
 
 ## Installation
 
@@ -116,6 +119,11 @@ keytool -genkeypair -v -storetype PKCS12 -keystore my-upload-key.keystore -alias
 # Place the keystore file in android/app directory
 ```
 
+### Current Version
+- **Version Name**: 1.0.1
+- **Version Code**: 2
+- **Release Date**: May 15, 2024
+
 ## Development
 
 ### Project Structure
@@ -199,8 +207,21 @@ Tasks are stored locally using AsyncStorage, ensuring that data persists between
 - Dark mode support
 - Multi-user support
 
+## Privacy Policy
+
+QuickDone requires certain permissions to provide its full functionality:
+
+- **Camera Permission**: Used to take photos to attach to tasks
+- **Calendar Permission**: Used to sync tasks with your calendar
+- **Storage Permission**: Used to save task attachments and app data
+
+For more details about how we handle your data, please refer to our [Privacy Policy](https://www.icradleinnovations.com/privacy-policy).
+
 ## Support and Contact
-For support or inquiries, please contact [your-email@example.com](mailto:your-email@example.com).
+For support or inquiries, please contact [info@icradleinnovations.com](mailto:info@icradleinnovations.com).
 
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## About iCradle Innovations
+QuickDone is developed and maintained by iCradle Innovations, a software development company based in Kampala, Uganda, specializing in mobile and web applications.
