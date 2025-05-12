@@ -32,6 +32,14 @@
       },
       "credentialsSource": "local"
     },
+    "local-aab": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "app-bundle",
+        "gradleCommand": ":app:bundleRelease"
+      },
+      "credentialsSource": "local"
+    },
     "development-simulator": {
       "developmentClient": true,
       "distribution": "internal",

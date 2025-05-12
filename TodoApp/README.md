@@ -44,16 +44,76 @@ The Todo List App is a mobile application built with React Native and Expo that 
    - Press 'a' to run on an Android emulator
    - Press 'i' to run on an iOS simulator (macOS only)
 
-## Building for Production
+## Building the App
 
-### Android
+### Development Builds
+
+#### Using EAS Build (Cloud)
+```bash
+# Android
+npx eas build --platform android --profile development
+
+# iOS
+npx eas build --platform ios --profile development
 ```
+
+#### Local Android Development APK
+```bash
+# Navigate to the android directory
+cd android
+
+# Build debug APK
+./gradlew assembleDebug
+
+# The APK will be available at:
+# android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+### Production Builds
+
+#### Using EAS Build (Cloud)
+```bash
+# Android
 npx eas build --platform android --profile production
+
+# iOS
+npx eas build --platform ios --profile production
 ```
 
-### iOS
+#### Local Android Production APK
+```bash
+# Navigate to the android directory
+cd android
+
+# Build release APK
+./gradlew assembleRelease
+
+# The APK will be available at:
+# android/app/build/outputs/apk/release/app-release.apk
 ```
-npx eas build --platform ios --profile production
+
+### Android App Bundle (AAB) for Google Play
+
+```bash
+# Navigate to the android directory
+cd android
+
+# Build release bundle
+./gradlew bundleRelease
+
+# The AAB will be available at:
+# android/app/build/outputs/bundle/release/app-release.aab
+```
+
+### Signing Android Builds
+
+For production builds, you need to create a keystore file:
+
+```bash
+# Generate a keystore file (only needed once)
+keytool -genkeypair -v -storetype PKCS12 -keystore my-upload-key.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
+
+# Place the keystore file in android/app directory
 ```
 
 ## Development
