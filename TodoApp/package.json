@@ -1,5 +1,5 @@
 {
-  "name": "todoapp",
+  "name": "quickdone",
   "version": "1.0.0",
   "main": "index.ts",
   "type": "module",
@@ -7,7 +7,8 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test": "jest"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.1.2",

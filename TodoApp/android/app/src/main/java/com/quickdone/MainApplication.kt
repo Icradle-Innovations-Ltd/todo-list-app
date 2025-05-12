@@ -1,4 +1,4 @@
-package com.todoapp
+package com.quickdone
 
 import android.app.Application
 import android.content.res.Configuration

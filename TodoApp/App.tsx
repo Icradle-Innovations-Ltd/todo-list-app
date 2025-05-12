@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   adaptNavigationTheme
 } from 'react-native-paper';
-import { useColorScheme, View, StyleSheet, LogBox } from 'react-native';
+import { useColorScheme, View, StyleSheet, LogBox, AppState } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { 
   DarkTheme as NavigationDarkTheme, 
@@ -109,19 +109,35 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   
+  // Function to check onboarding status
+  const checkOnboardingStatus = async () => {
+    try {
+      const value = await AsyncStorage.getItem('hasCompletedOnboarding');
+      setHasCompletedOnboarding(value === 'true');
+    } catch (error) {
+      console.error('Error checking onboarding status:', error);
+    }
+  };
+
   // Initialize app - check onboarding status and setup caching
   useEffect(() => {
     const initializeApp = async () => {
       try {
         // Setup image cache
-        await setupImageCache();
+        const cacheSetupSuccess = await setupImageCache();
         
-        // Clear expired cache items
-        clearExpiredCache().catch(err => console.log('Error clearing expired cache:', err));
+        if (cacheSetupSuccess) {
+          // Only try to clear expired cache if setup was successful
+          try {
+            await clearExpiredCache();
+          } catch (cacheError) {
+            console.log('Error clearing expired cache:', cacheError);
+            // Non-critical error, continue app initialization
+          }
+        }
         
         // Check onboarding status
-        const value = await AsyncStorage.getItem('hasCompletedOnboarding');
-        setHasCompletedOnboarding(value === 'true');
+        await checkOnboardingStatus();
         
         // Simulate loading state to check authentication (reduced for better UX)
         setTimeout(() => {
@@ -129,11 +145,26 @@ export default function App() {
         }, 500);
       } catch (error) {
         console.error('Error during app initialization:', error);
+        // Even if there's an error, we should still show the app
         setIsLoading(false);
       }
     };
     
     initializeApp();
+  }, []);
+  
+  // Listen for app state changes to check onboarding status when app comes to foreground
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (nextAppState === 'active') {
+        // App has come to the foreground
+        checkOnboardingStatus();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
   
   if (isLoading) {
@@ -202,7 +233,10 @@ export default function App() {
                       />
                       <Appbar.Action 
                         icon="logout" 
-                        onPress={() => useAuthStore.getState().logout()} 
+                        onPress={() => {
+                          const { logout } = useAuthStore.getState();
+                          if (logout) logout();
+                        }} 
                       />
                     </>
                   )}
@@ -224,7 +258,11 @@ export default function App() {
             // Auth screens
             <>
               {!hasCompletedOnboarding ? (
-                <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+                <>
+                  <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+                  <Stack.Screen name="Register" component={RegisterScreen} />
+                  <Stack.Screen name="Login" component={LoginScreen} />
+                </>
               ) : (
                 <>
                   <Stack.Screen name="Login" component={LoginScreen} />

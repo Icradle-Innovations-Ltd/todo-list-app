@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Task Master Pro",
+    "name": "QuickDone",
     "slug": "TodoApp",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,8 +9,12 @@
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-screen.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#6200EE"
+      "resizeMode": "contain",
+      "backgroundColor": "#6200EE",
+      "androidStatusBar": {
+        "translucent": true,
+        "backgroundColor": "#00000000"
+      }
     },
     "ios": {
       "supportsTablet": true
@@ -21,7 +25,12 @@
         "backgroundColor": "#6200EE"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.todoapp"
+      "package": "com.quickdone",
+      "softwareKeyboardLayoutMode": "pan",
+      "splash": {
+        "resizeMode": "contain",
+        "backgroundColor": "#6200EE"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"

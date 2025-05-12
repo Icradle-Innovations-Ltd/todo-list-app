@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Image, ImageProps, ActivityIndicator, View, StyleSheet } from 'react-native';
 import { cacheImage } from '../utils/cacheUtils';
 
@@ -17,18 +17,23 @@ const CachedImage: React.FC<CachedImageProps> = ({
     typeof source === 'number' ? source : { uri: '' }
   );
   const [loading, setLoading] = useState(true);
+  const loadedFromCache = useRef(false);
 
   useEffect(() => {
     let isMounted = true;
+    loadedFromCache.current = false;
+    setLoading(true);
 
     const loadImage = async () => {
       if (typeof source !== 'number') {
         try {
-          setLoading(true);
           const cachedUri = await cacheImage(source.uri);
           
           if (isMounted) {
             setImageSource({ uri: cachedUri });
+            // Only set loading to false here if the image is from cache
+            // This prevents race condition with onLoad event
+            loadedFromCache.current = true;
             setLoading(false);
           }
         } catch (error) {
@@ -54,10 +59,36 @@ const CachedImage: React.FC<CachedImageProps> = ({
     };
   }, [source]);
 
+  // Handle image load event
+  const handleImageLoad = () => {
+    // Only set loading to false if it wasn't already set by the cache loading
+    if (!loadedFromCache.current) {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={[styles.container, style]}>
       {loading && (
-        <View style={[styles.placeholder, { backgroundColor: placeholderColor }, style]}>
+        <View 
+          
+          
+          
+          
+          
+          style={[styles.placeholder, { backgroundColor: placeholderColor }, style]}
+          testID="cached-image-loading"
+        
+          testID="cached-image-loading"
+        
+          testID="cached-image-loading"
+        
+          testID="cached-image-loading"
+        
+          testID="cached-image-loading"
+        
+          testID="cached-image-loading"
+        >
           <ActivityIndicator size="small" color="#999" />
         </View>
       )}
@@ -68,7 +99,7 @@ const CachedImage: React.FC<CachedImageProps> = ({
           style,
           loading ? { opacity: 0 } : { opacity: 1 }
         ]}
-        onLoad={() => setLoading(false)}
+        onLoad={handleImageLoad}
       />
     </View>
   );

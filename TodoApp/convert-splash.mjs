@@ -5,9 +5,9 @@ async function convertSplashScreen() {
   try {
     const svgBuffer = fs.readFileSync('./assets/splash-screen.svg');
     
-    // Create splash screen
+    // Create splash screen with higher resolution to ensure full coverage
     await sharp(svgBuffer)
-      .resize(1242, 2436)
+      .resize(1500, 3000) // Increased size for better coverage
       .png()
       .toFile('./assets/splash-screen.png');
     console.log('Created splash-screen.png');
